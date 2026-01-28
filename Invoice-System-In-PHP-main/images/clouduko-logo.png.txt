@@ -1,0 +1,10 @@
+CLOUDUKO LOGO PLACEHOLDER
+
+To add your CloudUko logo:
+1. Create or obtain your company logo (PNG format recommended)
+2. Resize it to approximately 300x90 pixels
+3. Save it as "clouduko-logo.png" in this images folder
+4. Delete this placeholder file
+
+Until you add your logo, the system will show a broken image icon on the login page.
+You can temporarily copy an existing logo file and rename it to clouduko-logo.png.

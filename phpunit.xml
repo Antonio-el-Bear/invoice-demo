@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.5/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         verbose="true"
+         stopOnFailure="false">
+    <testsuites>
+        <testsuite name="Unit Tests">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Integration Tests">
+            <directory>tests/Integration</directory>
+        </testsuite>
+    </testsuites>
+    <coverage processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">Invoice-System-In-PHP-main</directory>
+        </include>
+        <exclude>
+            <directory>Invoice-System-In-PHP-main/includes/fpdf</directory>
+            <directory>Invoice-System-In-PHP-main/EMPLOYEE_LEAVE_MANAGEMENT_SYSTEM_USING_PHP11</directory>
+            <file>Invoice-System-In-PHP-main/class.phpmailer.php</file>
+        </exclude>
+    </coverage>
+    <php>
+        <ini name="display_errors" value="1"/>
+        <ini name="error_reporting" value="-1"/>
+    </php>
+</phpunit>
