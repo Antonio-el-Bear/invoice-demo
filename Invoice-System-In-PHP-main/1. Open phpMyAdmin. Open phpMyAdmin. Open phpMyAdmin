@@ -1,0 +1,5 @@
+1. Open phpMyAdmin
+2. Select "invoicemgsys" database  
+3. Click SQL tab
+4. Paste content from: clouduko-enhancements.sql
+5. Click Go41
