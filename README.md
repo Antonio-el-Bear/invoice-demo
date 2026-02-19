@@ -1,57 +1,31 @@
-<?phpInvoice System - PHP-Based Invoicing & Management Solution
+# 📊 Invoice System - PHP-Based Invoicing & Management Solution
 
-namespace Tests\Feature; invoicing system built with **PHP, MySQL, Bootstrap, and JavaScript**. This application helps businesses manage invoices, clients, products, payments, and generate detailed financial reports.
+A comprehensive invoicing system built with **PHP, MySQL, Bootstrap, and JavaScript**. This application helps businesses manage invoices, clients, products, payments, and generate detailed financial reports.
 
-use App\Jobs\Util\WebhookHandler;
-use App\Models\Company;
-use App\Models\Invoice;-is-this)
-use App\Models\User;y-features)
-use App\Models\Webhook;(#system-requirements)
-use Illuminate\Support\Facades\Bus;
-use Tests\TestCase;-to-use)
-- [File Structure](#file-structure)
-class InvoiceRestoreWebhookTest extends TestCase
-{ [Key Features Explained](#key-features-explained)
-    public function test_restore_dispatches_webhook_when_subscription_exists(): void
-    {
-        // Arrange
-        Bus::fake();
-        $company = Company::factory()->create();
-        $user = User::factory()->for($company)->create();
-        $invoice = Invoice::factory()->for($company)->for($user)->create([edium-sized businesses. It provides:
-            'is_deleted' => true,
-            'deleted_at' => now(),te, edit, send, and track invoices
-        ]);nt Management** - Manage customer information and contact details
+## 📋 Table of Contents
+- [Features](#-features)
+- [System Requirements](#-system-requirements)
+- [Installation](#-installation)
+- [How To Use](#-how-to-use)
+- [File Structure](#-file-structure)
+- [Key Features Explained](#-key-features-explained)
+- [Default Credentials](#-default-credentials)
+- [Troubleshooting](#-troubleshooting)
+- [Support & Contributions](#-support--contributions)
+
+## ✨ Features
+
+Designed for small to medium-sized businesses. It provides:
+
+- 📄 **Invoice Management** - Create, edit, send, and track invoices
+- 👥 **Customer Management** - Manage customer information and contact details
 - 📦 **Product/Service Catalog** - Maintain products and services with pricing
-        Webhook::factory()->create([nd track payments against invoices
-            'company_id' => $company->id,thly income, customer summaries, and overdue analysis
-            'event_id' => Webhook::EVENT_RESTORE_INVOICE,ure login
-        ]);l Notifications** - Send invoices and payment reminders via email
+- 💰 **Payment Recording** - Record and track payments against invoices
+- 📊 **Financial Reports** - Generate monthly income, customer summaries, and overdue analysis
+- 🔐 **Secure Login** - User authentication with session management
+- 📧 **Email Notifications** - Send invoices and payment reminders via email
 - 🤖 **Automation** - Automated daily reminders for overdue invoices
-        // Acty** - Bcrypt password hashing and SQL injection prevention
-        $invoice->restore();
----
-        // Assert
-        Bus::assertDispatched(WebhookHandler::class, function ($job) use ($invoice) {
-            return $job->event_id === Webhook::EVENT_RESTORE_INVOICE
-                && $job->entity->id === $invoice->id;
-        });-------------|
-    }ser Authentication** | Secure login with bcrypt password hashing and session management |
-} **Multi-User Support** | Admin and user roles with different permission levels |
-| **Client Management** | Add, edit, delete, and organize client/customer information |
-DB_CONNECTION=mysqln** | Create invoices with custom items, taxes, discounts, and calculations |
-DB_HOST=127.0.0.1ing** | Monitor invoice status (Draft, Sent, Paid, Overdue) |
-DB_PORT=3306Recording** | Record partial or full payments with dates and references |
-DB_DATABASE=securedoc| Generate and download invoices as PDF files |
-DB_USERNAME=rootation** | Send invoices directly via email with PDF attachments |
-DB_PASSWORD=Tracking** | Automatic identification and tracking of overdue invoices |
-| **Payment Reminders** | Send automated email reminders for unpaid/overdue invoices |
-cd "C:\Users\User\Documents\cloud uko\apps\document-reader\backend"verdue analysis |
-$env:Path = "C:\Users\User\Documents\Software\xampp\php;$env:Path"; php artisan migrate
-| **Audit Logging** | Track all system activities for security and compliance |
-| **Responsive Design** | Works on desktop, tablet, and mobile devices |
-
----
+- 🛡️ **Security** - Bcrypt password hashing and SQL injection prevention
 
 ## 💻 System Requirements
 
