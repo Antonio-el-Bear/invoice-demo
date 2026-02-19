@@ -3,6 +3,9 @@
 
 include_once('includes/config.php');
 
+// Create database connection
+$mysqli = new mysqli(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE_NAME);
+
 // show PHP errors
 ini_set('display_errors', 1);
 

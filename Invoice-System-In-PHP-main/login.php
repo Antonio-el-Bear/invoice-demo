@@ -10,7 +10,7 @@
 session_start();
 
 // If user is already logged in, redirect to dashboard
-if(!empty(['id'])) {
+if(!empty($_SESSION['login_username'])) {
     header('Location: dashboard.php');
     exit;
 }
@@ -29,14 +29,18 @@ if(!empty($_POST['username']) && !empty($_POST['password'])) {
     extract($_POST);
 
     $username = mysqli_real_escape_string($mysqli,$_POST['username']);
-    $pass_encrypt = mysqli_real_escape_string($mysqli,$_POST['password']);
+    $password = mysqli_real_escape_string($mysqli,$_POST['password']);
+    
+    // Hash password with MD5 to match database storage
+    $pass_encrypt = md5($password);
 
     $fetch = $mysqli->query("SELECT * FROM `users` WHERE username='$username' AND `password` = '$pass_encrypt'");
 
     $row = mysqli_fetch_array($fetch);
 
-    if (password_verify($pass_encrypt, $row['passowrd'])) {
+    if (!empty($row) && $row['password'] === $pass_encrypt) {
         $_SESSION['login_username'] = $row['username'];    
+        $_SESSION['login_id'] = $row['id'];
         echo 1;  
     } else {
         echo 0;

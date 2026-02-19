@@ -13,8 +13,10 @@ $(document).ready(function() {
 		$(".invoice_type").text(invoiceType);
 	});
 
-	// Load dataTables
-	$("#data-table").dataTable();
+	// Load dataTables (only if library is available and element exists)
+	if ($.fn.dataTable && $("#data-table").length) {
+		$("#data-table").dataTable();
+	}
 
 	// add product
 	$("#action_add_product").click(function(e) {
@@ -93,7 +95,7 @@ $(document).ready(function() {
     });
 
 	$(document).on('click','#btn-login', function(e){
-		e.preventDefault;
+		e.preventDefault();
 		actionLogin();
 	});
 
@@ -778,7 +780,11 @@ $(document).ready(function() {
 
 		} else {
 
-			var $btn = $("#btn-login").button("loading");
+			var $btn = $("#btn-login");
+			var originalText = $btn.text();
+			
+			// Disable button and show loading state
+			$btn.prop("disabled", true).text("Loading...");
 
 			jQuery.ajax({
 				url: 'response.php',
@@ -786,18 +792,28 @@ $(document).ready(function() {
 				data: $("#login_form").serialize(), // serializes the form's elements.
 				dataType: 'json',
 				success: function(data){
+					console.log("Login response:", data);
 					$("#response .message").html("<strong>" + data.status + "</strong>: " + data.message);
 					$("#response").removeClass("alert-warning").addClass("alert-success").fadeIn();
 					$("html, body").animate({ scrollTop: $('#response').offset().top }, 1000);
-					$btn.button("reset");
+					
+					// Reset button
+					$btn.prop("disabled", false).text(originalText);
 
-					window.location = "dashboard.php";
+					if(data.status === "Success") {
+						setTimeout(function() {
+							window.location = "dashboard.php";
+						}, 2000);
+					}
 				},
-				error: function(data){
-					$("#response .message").html("<strong>" + data.status + "</strong>: " + data.message);
+				error: function(xhr, status, error){
+					console.log("Login error:", error, status, xhr);
+					$("#response .message").html("<strong>Error</strong>: Failed to connect to server. Check console for details.");
 					$("#response").removeClass("alert-success").addClass("alert-warning").fadeIn();
 					$("html, body").animate({ scrollTop: $('#response').offset().top }, 1000);
-					$btn.button("reset");
+					
+					// Reset button
+					$btn.prop("disabled", false).text(originalText);
 				}
 
 			});

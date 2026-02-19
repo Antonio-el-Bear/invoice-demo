@@ -24,9 +24,30 @@ Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
 # ============================================
+# STEP 0: DEPLOY APPLICATION FILES
+# ============================================
+Write-Host "[0/5] Deploying Application Files..." -ForegroundColor Yellow
+
+$sourceDir = "c:\Users\User\Documents\cloud uko\apps\Invoice-System-In-PHP-main\Invoice-System-In-PHP-main"
+$webRoot = "C:\Users\User\Documents\Software\xampp\htdocs\clouduko-invoice"
+
+if (Test-Path $sourceDir) {
+    try {
+        Copy-Item -Path "$sourceDir\*" -Destination $webRoot -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+        Write-Host "      ✓ Application files deployed to web root" -ForegroundColor Green
+    } catch {
+        Write-Host "      ⚠ Warning: Could not copy some files, but continuing..." -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "      ⚠ Warning: Source directory not found, skipping file copy" -ForegroundColor Yellow
+}
+
+Write-Host ""
+
+# ============================================
 # STEP 1: START MARIADB/MYSQL DATABASE
 # ============================================
-Write-Host "[1/4] Starting MariaDB/MySQL Database Server..." -ForegroundColor Yellow
+Write-Host "[1/5] Starting MariaDB/MySQL Database Server..." -ForegroundColor Yellow
 
 # Path to MariaDB executable in XAMPP installation
 $mysqlPath = "C:\Users\User\Documents\Software\xampp\mysql\bin\mysqld.exe"
@@ -35,7 +56,8 @@ $mysqlPath = "C:\Users\User\Documents\Software\xampp\mysql\bin\mysqld.exe"
 $mysqlRunning = Get-Process -Name "mysqld" -ErrorAction SilentlyContinue
 
 if ($mysqlRunning) {
-    Write-Host "      ✓ MariaDB is already running (PID: $($mysqlRunning.Id))" -ForegroundColor Green
+    $pid = $mysqlRunning.Id
+    Write-Host "      ✓ MariaDB is already running (PID: $pid)" -ForegroundColor Green
 } else {
     # Check if mysqld.exe exists
     if (Test-Path $mysqlPath) {
@@ -57,20 +79,52 @@ if ($mysqlRunning) {
 Write-Host ""
 
 # ============================================
-# STEP 2: REFRESH PHP ENVIRONMENT PATH
+# STEP 2: VERIFY DATABASE CONNECTION
 # ============================================
-Write-Host "[2/4] Configuring PHP Environment..." -ForegroundColor Yellow
+Write-Host "[2/5] Verifying Database Connection..." -ForegroundColor Yellow
 
-# Refresh PATH to include newly installed PHP
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+$mysqlCmd = "C:\Users\User\Documents\Software\xampp\mysql\bin\mysql.exe"
+$retries = 5
+$connected = $false
+
+for ($i = 1; $i -le $retries; $i++) {
+    try {
+        $result = & $mysqlCmd -u root -h localhost -e "SELECT 1" 2>&1 | Where-Object {$_ -match "1"}
+        if ($result) {
+            Write-Host "      ✓ Database connection successful" -ForegroundColor Green
+            $connected = $true
+            break
+        }
+    } catch {
+        # Continue trying
+    }
+    
+    if ($i -lt $retries) {
+        Write-Host "      ⏳ Waiting for database... (attempt $i/$retries)" -ForegroundColor Gray
+        Start-Sleep -Seconds 2
+    }
+}
+
+if (-not $connected) {
+    Write-Host "      ⚠ Warning: Database connection could not be verified" -ForegroundColor Yellow
+    Write-Host "      ⚠ But continuing anyway..." -ForegroundColor Yellow
+}
+
+Write-Host ""
+
+# ============================================
+# STEP 3: CONFIGURE PHP ENVIRONMENT
+# ============================================
+Write-Host "[3/5] Configuring PHP Environment..." -ForegroundColor Yellow
 
 # Verify PHP is accessible
-$phpVersion = php -v 2>&1 | Select-Object -First 1
-if ($phpVersion -match "PHP") {
+$phpPath = "C:\Users\User\Documents\Software\xampp\php\php.exe"
+if (Test-Path $phpPath) {
+    $phpVersion = & $phpPath -v 2>&1 | Select-Object -First 1
     Write-Host "      ✓ PHP is ready: $phpVersion" -ForegroundColor Green
 } else {
-    Write-Host "      ✗ ERROR: PHP not found in PATH" -ForegroundColor Red
-    Write-Host "      Please ensure PHP is installed via winget" -ForegroundColor Red
+    Write-Host "      ✗ ERROR: PHP not found at: $phpPath" -ForegroundColor Red
+    Write-Host "      Please ensure XAMPP is installed correctly" -ForegroundColor Red
     Read-Host "Press Enter to exit"
     exit 1
 }
@@ -78,12 +132,9 @@ if ($phpVersion -match "PHP") {
 Write-Host ""
 
 # ============================================
-# STEP 3: START PHP WEB SERVER
+# STEP 4: START PHP WEB SERVER
 # ============================================
-Write-Host "[3/4] Starting PHP Web Server..." -ForegroundColor Yellow
-
-# Path to invoice system (adjust if your installation is different)
-$webRoot = "C:\Users\User\Documents\Software\xampp\htdocs\clouduko-invoice"
+Write-Host "[4/5] Starting PHP Web Server..." -ForegroundColor Yellow
 
 # Verify web root exists
 if (Test-Path $webRoot) {
@@ -91,7 +142,7 @@ if (Test-Path $webRoot) {
     
     # Start PHP built-in server on localhost:8000
     # Server runs in background and logs to console
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$webRoot'; php -S localhost:8000" -WindowStyle Normal
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$webRoot'; & '$phpPath' -S localhost:8000" -WindowStyle Normal
     
     Write-Host "      ✓ PHP Server started on http://localhost:8000" -ForegroundColor Green
     
@@ -108,9 +159,9 @@ if (Test-Path $webRoot) {
 Write-Host ""
 
 # ============================================
-# STEP 4: OPEN WEB BROWSER
+# STEP 5: OPEN WEB BROWSER
 # ============================================
-Write-Host "[4/4] Launching CloudUko Invoice System..." -ForegroundColor Yellow
+Write-Host "[5/5] Launching CloudUko Invoice System..." -ForegroundColor Yellow
 
 # Open default web browser to login page
 Start-Process "http://localhost:8000"

@@ -18,8 +18,9 @@
 	<script src="js/bootstrap.min.js"></script>
 	
 	<!-- DataTables: jQuery plugin for interactive tables (LOCAL) -->
-	<script src="js/jquery.dataTables.min.js"></script>
-	<script src="js/dataTables.bootstrap.min.js"></script>
+	<!-- COMMENTED OUT: Files not found -->
+	<!-- <script src="js/jquery.dataTables.min.js"></script>
+	<script src="js/dataTables.bootstrap.min.js"></script> -->
 	
 	<!-- Bootstrap DateTime Picker: Date/time selector -->
 	<script src="js/bootstrap.datetime.js"></script>
@@ -41,8 +42,9 @@
 	<link rel="stylesheet" href="css/bootstrap.datetimepicker.css">
 	
 	<!-- DataTables CSS: Styles for data tables (LOCAL) -->
-	<link rel="stylesheet" href="css/jquery.dataTables.min.css">
-	<link rel="stylesheet" href="css/dataTables.bootstrap.min.css">
+	<!-- COMMENTED OUT: Files not found -->
+	<!-- <link rel="stylesheet" href="css/jquery.dataTables.min.css">
+	<link rel="stylesheet" href="css/dataTables.bootstrap.min.css"> -->
 	
 	<!-- Custom Styles: Application-specific CSS -->
 	<link rel="stylesheet" href="css/styles.css">

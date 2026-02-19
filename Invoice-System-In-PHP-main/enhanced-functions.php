@@ -6,7 +6,7 @@
  * 
  * FIXES APPLIED:
  * 1. recordPayment()       — was using wrong column 'amount_paid' (didn't exist); added NULL safety
- * 2. getCustomerSummary()  — JOIN was on customers table but functions.php uses store_customers; fixed
+ * 2. getCustomerSummary()  — JOIN was on wrong table; fixed to use customers table
  * 3. getMonthlyIncomeReport() — STR_TO_DATE format mismatch causing empty results; fixed
  * 4. getOverdueInvoices()  — same STR_TO_DATE fix + duplicate row issue via GROUP BY already present
  * 5. sendOverdueReminder() — wrong PHPMailer include path; fixed
@@ -89,7 +89,7 @@ function getPaymentHistory($invoice_id) {
 
 // ─── GET OVERDUE INVOICES ─────────────────────────────────────────────────────
 // FIX: STR_TO_DATE format must match how dates are stored (d/m/Y).
-//      Added COALESCE for amount_paid. Fixed JOIN to use store_customers.
+//      Added COALESCE for amount_paid. Fixed JOIN to use customers table.
 function getOverdueInvoices() {
     global $mysqli;
 
@@ -101,7 +101,7 @@ function getOverdueInvoices() {
               DATEDIFF('$today', STR_TO_DATE(i.invoice_due_date, '%d/%m/%Y')) AS days_overdue,
               (i.total - COALESCE(i.amount_paid, 0)) AS balance_due
               FROM invoices i
-              JOIN store_customers c ON c.invoice = i.invoice
+                JOIN customers c ON c.invoice = i.invoice
               WHERE i.status = 'open'
               AND STR_TO_DATE(i.invoice_due_date, '%d/%m/%Y') < '$today'
               GROUP BY i.invoice
@@ -119,7 +119,7 @@ function getOverdueInvoices() {
 }
 
 // ─── GET UPCOMING DUE INVOICES ────────────────────────────────────────────────
-// FIX: Same STR_TO_DATE fix + store_customers table name
+// FIX: Same STR_TO_DATE fix + customers table
 function getUpcomingDueInvoices() {
     global $mysqli;
 
@@ -130,7 +130,7 @@ function getUpcomingDueInvoices() {
               DATEDIFF(STR_TO_DATE(i.invoice_due_date, '%d/%m/%Y'), '$today') AS days_until_due,
               (i.total - COALESCE(i.amount_paid, 0)) AS balance_due
               FROM invoices i
-              JOIN store_customers c ON c.invoice = i.invoice
+              JOIN customers c ON c.invoice = i.invoice
               WHERE i.status = 'open'
               AND STR_TO_DATE(i.invoice_due_date, '%d/%m/%Y') BETWEEN '$today' AND '$week_from_now'
               ORDER BY STR_TO_DATE(i.invoice_due_date, '%d/%m/%Y') ASC";
@@ -185,8 +185,8 @@ function getMonthlyIncomeReport($year = null, $month = null) {
 }
 
 // ─── CUSTOMER SUMMARY ─────────────────────────────────────────────────────────
-// FIX: Original JOIN used 'customers' table — the actual table is 'store_customers'
-//      (confirmed from functions.php which uses store_customers throughout).
+// FIX: Original JOIN used 'customers' table — the actual table is 'customers'
+//      (confirmed from functions.php which uses customers throughout).
 function getCustomerSummary($customer_id = null) {
     global $mysqli;
 
@@ -203,7 +203,7 @@ function getCustomerSummary($customer_id = null) {
               SUM(CASE WHEN i.status = 'paid' THEN i.total ELSE 0 END)               AS total_paid,
               SUM(CASE WHEN i.status = 'open' THEN (i.total - COALESCE(i.amount_paid,0)) ELSE 0 END) AS total_outstanding,
               MAX(STR_TO_DATE(i.invoice_date, '%d/%m/%Y'))                            AS last_invoice_date
-              FROM store_customers c
+              FROM customers c
               LEFT JOIN invoices i ON c.invoice = i.invoice
               $where
               GROUP BY c.id, c.name, c.email
@@ -223,7 +223,7 @@ function getCustomerSummary($customer_id = null) {
 // ─── SEND OVERDUE REMINDER ────────────────────────────────────────────────────
 // FIX: PHPMailer include path was wrong — 'class.phpmailer.php' doesn't exist at root.
 //      Corrected to use vendor autoload or the correct relative path.
-//      Also fixed JOIN to use store_customers.
+//      Also fixed JOIN to use customers.
 function sendOverdueReminder($invoice_id, $customer_email) {
     global $mysqli;
 
@@ -231,7 +231,7 @@ function sendOverdueReminder($invoice_id, $customer_email) {
 
     $query  = "SELECT i.*, c.name
                FROM invoices i
-               JOIN store_customers c ON c.invoice = i.invoice
+               JOIN customers c ON c.invoice = i.invoice
                WHERE i.invoice = '$invoice_id'
                LIMIT 1";
     $result  = $mysqli->query($query);
@@ -341,7 +341,7 @@ function exportInvoicesCSV() {
                       i.invoice_type, i.status, i.total, COALESCE(i.amount_paid,0) AS amount_paid,
                       (i.total - COALESCE(i.amount_paid,0)) AS balance
                FROM invoices i
-               JOIN store_customers c ON c.invoice = i.invoice
+               JOIN customers c ON c.invoice = i.invoice
                ORDER BY i.invoice DESC";
     $result = $mysqli->query($query);
 
@@ -380,7 +380,7 @@ function exportPaymentsCSV() {
 
     $query  = "SELECT p.id, p.invoice, c.name, p.amount, p.payment_date, p.payment_method, p.notes
                FROM payments p
-               JOIN store_customers c ON c.invoice = p.invoice
+               JOIN customers c ON c.invoice = p.invoice
                ORDER BY p.payment_date DESC";
     $result = $mysqli->query($query);
 
@@ -413,7 +413,7 @@ function exportPaymentsCSV() {
 function exportCustomersCSV() {
     global $mysqli;
 
-    $result = $mysqli->query("SELECT * FROM store_customers ORDER BY name ASC");
+    $result = $mysqli->query("SELECT * FROM customers ORDER BY name ASC");
 
     if (!$result) {
         die('Export failed: ' . $mysqli->error);
@@ -466,7 +466,7 @@ function getAgedReceivables() {
               SUM(i.total - COALESCE(i.amount_paid, 0)) AS total_amount,
               COUNT(DISTINCT c.id) AS unique_customers
               FROM invoices i
-              JOIN store_customers c ON c.invoice = i.invoice
+              JOIN customers c ON c.invoice = i.invoice
               WHERE i.status = 'open'
               AND STR_TO_DATE(i.invoice_due_date, '%d/%m/%Y') < '$today'
               GROUP BY aging_bucket
@@ -532,7 +532,7 @@ function getCustomerRiskReport() {
                 WHEN AVG(DATEDIFF(CURDATE(), STR_TO_DATE(i.invoice_due_date, '%d/%m/%Y'))) > 30 THEN 'MEDIUM RISK'
                 ELSE 'LOW RISK'
               END AS risk_level
-              FROM store_customers c
+              FROM customers c
               LEFT JOIN invoices i ON c.invoice = i.invoice
               GROUP BY c.id, c.name, c.email
               HAVING overdue_count > 0
@@ -570,7 +570,7 @@ function getCustomerLifetimeValue($customer_id = null) {
               MAX(STR_TO_DATE(i.invoice_date, '%d/%m/%Y')) AS last_invoice_date,
               DATEDIFF(MAX(STR_TO_DATE(i.invoice_date, '%d/%m/%Y')), MIN(STR_TO_DATE(i.invoice_date, '%d/%m/%Y'))) AS days_as_customer,
               AVG(i.total) AS avg_invoice_value
-              FROM store_customers c
+              FROM customers c
               LEFT JOIN invoices i ON c.invoice = i.invoice
               $where
               GROUP BY c.id, c.name, c.email
@@ -606,7 +606,7 @@ function getCustomerPaymentBehavior($customer_id = null) {
               SUM(CASE WHEN DATEDIFF(p.payment_date, i.invoice_due_date) <= 0 THEN 1 ELSE 0 END) AS on_time_payments,
               SUM(CASE WHEN DATEDIFF(p.payment_date, i.invoice_due_date) > 0 THEN 1 ELSE 0 END) AS late_payments,
               ROUND((SUM(CASE WHEN DATEDIFF(p.payment_date, i.invoice_due_date) <= 0 THEN 1 ELSE 0 END) / COUNT(p.id)) * 100, 2) AS on_time_rate
-              FROM store_customers c
+              FROM customers c
               LEFT JOIN payments p ON c.invoice = p.invoice
               LEFT JOIN invoices i ON p.invoice = i.invoice
               $where
@@ -859,7 +859,7 @@ function getDashboardMetrics() {
     }
 
     // Customer metrics
-    $q5 = "SELECT COUNT(*) as total, COUNT(DISTINCT CASE WHEN i.invoice IS NOT NULL THEN c.id END) as active FROM store_customers c LEFT JOIN invoices i ON c.invoice = i.invoice";
+    $q5 = "SELECT COUNT(*) as total, COUNT(DISTINCT CASE WHEN i.invoice IS NOT NULL THEN c.id END) as active FROM customers c LEFT JOIN invoices i ON c.invoice = i.invoice";
     $r5 = $mysqli->query($q5);
     if ($r5) {
         $d5 = $r5->fetch_assoc();

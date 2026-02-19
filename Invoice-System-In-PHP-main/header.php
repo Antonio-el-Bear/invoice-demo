@@ -37,8 +37,9 @@
   <link rel="stylesheet" href="css/bootstrap.datetimepicker.css">
   
   <!-- DataTables CSS: Interactive table styles (LOCAL COPY) -->
-  <link rel="stylesheet" href="css/jquery.dataTables.min.css">
-  <link rel="stylesheet" href="css/dataTables.bootstrap.min.css">
+  <!-- COMMENTED OUT: Files not found -->
+  <!-- <link rel="stylesheet" href="css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="css/dataTables.bootstrap.min.css"> -->
   
   <!-- Custom Application Styles -->
   <link rel="stylesheet" href="css/styles.css">
@@ -57,8 +58,9 @@
 	<script src="js/bootstrap.min.js"></script>
 	
 	<!-- DataTables: Makes tables searchable, sortable, paginated (LOCAL COPY) -->
-	<script src="js/jquery.dataTables.min.js"></script>
-	<script src="js/dataTables.bootstrap.min.js"></script>
+	<!-- COMMENTED OUT: Files not found -->
+	<!-- <script src="js/jquery.dataTables.min.js"></script>
+	<script src="js/dataTables.bootstrap.min.js"></script> -->
 	
 	<!-- Bootstrap DateTime Picker: Calendar/time selection widget -->
 	<script src="js/bootstrap.datetime.js"></script>
