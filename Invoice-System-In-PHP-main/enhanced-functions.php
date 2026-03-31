@@ -260,7 +260,13 @@ function sendOverdueReminder($invoice_id, $customer_email) {
         return ['status' => 'Error', 'message' => 'PHPMailer not found. Check vendor/ directory.'];
     }
 
-    $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+    // Use PHPMailer from namespace if available, fallback otherwise
+    if (class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+        $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+    } else {
+        $mail = new PHPMailer(true);
+    }
+    // ...existing code...
 
     try {
         $mail->isSMTP();
