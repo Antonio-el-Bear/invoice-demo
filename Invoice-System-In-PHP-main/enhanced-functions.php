@@ -225,6 +225,26 @@ function getCustomerSummary($customer_id = null) {
 //      Corrected to use vendor autoload or the correct relative path.
 //      Also fixed JOIN to use customers.
 function sendOverdueReminder($invoice_id, $customer_email) {
+        // Ensure PHPMailer is loaded if not already
+        if (!class_exists('PHPMailer\\PHPMailer\\PHPMailer')) {
+            if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+                require_once __DIR__ . '/vendor/autoload.php';
+            } elseif (file_exists(__DIR__ . '/vendor/phpmailer/phpmailer/src/PHPMailer.php')) {
+                require_once __DIR__ . '/vendor/phpmailer/phpmailer/src/PHPMailer.php';
+                require_once __DIR__ . '/vendor/phpmailer/phpmailer/src/SMTP.php';
+                require_once __DIR__ . '/vendor/phpmailer/phpmailer/src/Exception.php';
+            } elseif (file_exists(__DIR__ . '/class.phpmailer.php')) {
+                require_once __DIR__ . '/class.phpmailer.php';
+            }
+        }
+
+        // Define SMTP constants with defaults if not already defined
+        if (!defined('SMTP_HOST'))    define('SMTP_HOST', 'localhost');
+        if (!defined('SMTP_AUTH'))    define('SMTP_AUTH', false);
+        if (!defined('SMTP_USER'))    define('SMTP_USER', '');
+        if (!defined('SMTP_PASS'))    define('SMTP_PASS', '');
+        if (!defined('SMTP_SECURE'))  define('SMTP_SECURE', '');
+        if (!defined('SMTP_PORT'))    define('SMTP_PORT', 25);
     global $mysqli;
 
     $invoice_id = $mysqli->real_escape_string($invoice_id);
