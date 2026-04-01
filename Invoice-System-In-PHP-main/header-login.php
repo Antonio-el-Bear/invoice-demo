@@ -8,8 +8,13 @@
 	     JAVASCRIPT LIBRARIES (All Local for Offline Use)
 	     ============================================ -->
 	
-	<!-- jQuery: JavaScript library for DOM manipulation -->
-	<script src="js/jquery-1.11.1.min.js"></script>
+		<!-- jQuery: JavaScript library for DOM manipulation -->
+		<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+		<script>
+		if (typeof jQuery == 'undefined') {
+			document.write('<script src="js/jquery-1.11.1.min.js"><\/script>');
+		}
+		</script>
 	
 	<!-- Moment.js: Date/time manipulation library -->
 	<script src="js/moment.js"></script>
