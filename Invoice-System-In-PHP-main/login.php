@@ -26,29 +26,35 @@ die('Error : ('.$mysqli->connect_errno .') '. $mysqli->connect_error);
 
 // Process login form submission BEFORE including header
 if(!empty($_POST['username']) && !empty($_POST['password'])) {
-    extract($_POST);
-
     $username = mysqli_real_escape_string($mysqli,$_POST['username']);
     $password = mysqli_real_escape_string($mysqli,$_POST['password']);
-    
-    // Hash password with MD5 to match database storage
     $pass_encrypt = md5($password);
-
     $fetch = $mysqli->query("SELECT * FROM `users` WHERE username='$username' AND `password` = '$pass_encrypt'");
-
     $row = mysqli_fetch_array($fetch);
-
     if (!empty($row) && $row['password'] === $pass_encrypt) {
         $_SESSION['login_username'] = $row['username'];    
         $_SESSION['login_id'] = $row['id'];
-        echo 1;  
+        // Detect AJAX request
+        if(!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+            echo 1;
+        } else {
+            header('Location: dashboard.php');
+        }
     } else {
-        echo 0;
+        if(!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+            echo 0;
+        } else {
+            header('Location: login.php?error=1');
+        }
     }
     exit;
 } else if($_SERVER['REQUEST_METHOD'] == 'POST') {
     // If POST was made but with empty username/password
-    header("Location:index.php");
+    if(!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+        echo 0;
+    } else {
+        header("Location: login.php?error=1");
+    }
     exit;
 }
 
