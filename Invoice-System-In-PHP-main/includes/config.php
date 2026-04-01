@@ -24,10 +24,10 @@ ini_set('error_reporting', E_ALL);
 // These settings connect the application to your MySQL/MariaDB database
 // Only define if not already defined (prevents redefinition errors)
 
-if (!defined('DATABASE_HOST')) define('DATABASE_HOST', 'localhost');        // Database server address (usually 'localhost')
-if (!defined('DATABASE_NAME')) define('DATABASE_NAME', 'invoicemgsys');     // Name of the database
-if (!defined('DATABASE_USER')) define('DATABASE_USER', 'root');             // Database username
-if (!defined('DATABASE_PASS')) define('DATABASE_PASS', '');                 // Database password (empty for local development)
+if (!defined('DATABASE_HOST')) define('DATABASE_HOST', 'db');               // Database server address (Docker service name)
+if (!defined('DATABASE_NAME')) define('DATABASE_NAME', 'invoice_db');       // Name of the database (Docker Compose default)
+if (!defined('DATABASE_USER')) define('DATABASE_USER', 'invoice_user');     // Database username (Docker Compose default)
+if (!defined('DATABASE_PASS')) define('DATABASE_PASS', 'invoice_pass');     // Database password (Docker Compose default)
 
 // ============================================
 // COMPANY BRANDING & LOGO

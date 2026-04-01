@@ -56,6 +56,8 @@ if(!empty($_POST['username']) && !empty($_POST['password'])) {
 include('header.php');
 ?>
 
+<!-- Add jQuery CDN before any other scripts -->
+<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
 <div class="content-wrapper">
     <section class="content-header">
         <h1>Login</h1>
@@ -95,10 +97,10 @@ include('header.php');
 
 <script>
 $(document).ready(function(){
-    #login-form.on('submit', function(e){
+    $('#login-form').on('submit', function(e){
         e.preventDefault();
-        var username = #username.val();
-        var password = #password.val();
+        var username = $('#username').val();
+        var password = $('#password').val();
         
         $.ajax({
             type: 'POST',
