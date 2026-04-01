@@ -787,35 +787,25 @@ $(document).ready(function() {
 			$btn.prop("disabled", true).text("Loading...");
 
 			jQuery.ajax({
-				url: 'response.php',
+				url: 'login.php',
 				type: "POST",
-				data: $("#login_form").serialize(), // serializes the form's elements.
-				dataType: 'json',
-				success: function(data){
-					console.log("Login response:", data);
-					$("#response .message").html("<strong>" + data.status + "</strong>: " + data.message);
-					$("#response").removeClass("alert-warning").addClass("alert-success").fadeIn();
-					$("html, body").animate({ scrollTop: $('#response').offset().top }, 1000);
-					
-					// Reset button
-					$btn.prop("disabled", false).text(originalText);
-
-					if(data.status === "Success") {
-						setTimeout(function() {
-							window.location = "dashboard.php";
-						}, 2000);
+				data: $("#login_form").serialize(),
+				success: function(response){
+					if(response == 1) {
+						window.location = "dashboard.php";
+					} else {
+						$("#response .message").html("<strong>Error</strong>: Invalid username or password.");
+						$("#response").removeClass("alert-success").addClass("alert-warning").fadeIn();
+						$("html, body").animate({ scrollTop: $('#response').offset().top }, 1000);
 					}
+					$btn.prop("disabled", false).text(originalText);
 				},
 				error: function(xhr, status, error){
-					console.log("Login error:", error, status, xhr);
 					$("#response .message").html("<strong>Error</strong>: Failed to connect to server. Check console for details.");
 					$("#response").removeClass("alert-success").addClass("alert-warning").fadeIn();
 					$("html, body").animate({ scrollTop: $('#response').offset().top }, 1000);
-					
-					// Reset button
 					$btn.prop("disabled", false).text(originalText);
 				}
-
 			});
 
 		}
