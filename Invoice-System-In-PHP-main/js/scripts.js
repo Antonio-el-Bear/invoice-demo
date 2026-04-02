@@ -8,6 +8,10 @@
 $(document).ready(function() {
 	var autoFillMatches = [];
 	var serviceBundles = [];
+	var recurringPlans = [];
+	var currencyRates = null;
+	var currencyBase = 'USD';
+	var lastConvertedAmount = null;
 
 	// Invoice Type
 	$('#invoice_type').change(function() {
@@ -204,6 +208,53 @@ $(document).ready(function() {
 		applyServiceBundle(serviceBundles[bundleIndex]);
 	});
 
+	$(document).on('click', '.apply-recurring-plan', function(e) {
+		e.preventDefault();
+
+		var planIndex = parseInt($(this).attr('data-plan-index'), 10);
+		if (isNaN(planIndex) || !recurringPlans[planIndex]) {
+			return;
+		}
+
+		applyRecurringPlan(recurringPlans[planIndex]);
+	});
+
+	$(document).on('click', '#add_bundle_item_row', function(e) {
+		e.preventDefault();
+		addBundleItemRow();
+	});
+
+	$(document).on('click', '.remove-bundle-item-row', function(e) {
+		e.preventDefault();
+		$(this).closest('tr').remove();
+	});
+
+	$(document).on('click', '#action_create_service_bundle', function(e) {
+		e.preventDefault();
+		actionCreateServiceBundle();
+	});
+
+	$(document).on('click', '#convert_currency', function(e) {
+		e.preventDefault();
+		convertCurrencyAmount();
+	});
+
+	$(document).on('click', '#apply_conversion_shipping', function(e) {
+		e.preventDefault();
+		applyConversionToShipping();
+	});
+
+	$(document).on('click', '.delete-service-bundle', function(e) {
+		e.preventDefault();
+
+		var bundleId = $(this).attr('data-bundle-id');
+		var bundleRow = $(this).closest('tr');
+
+		$('#delete_service_bundle').modal({ backdrop: 'static', keyboard: false }).one('click', '#delete_service_bundle_confirm', function() {
+			deleteServiceBundle(bundleId, bundleRow);
+		});
+	});
+
 	$(document).on('click', ".item-select", function(e) {
 
    		e.preventDefault;
@@ -338,15 +389,17 @@ $(document).ready(function() {
     });
 
 	loadServiceBundles();
+	loadRecurringPlans();
+	loadCurrencyRates();
 
 	function updateTotals(elem) {
 
         var tr = $(elem).closest('tr'),
-            quantity = $('[name="invoice_product_qty[]"]', tr).val(),
+	        quantity = parseFloat($('[name="invoice_product_qty[]"]', tr).val()) || 0,
 	        price = $('[name="invoice_product_price[]"]', tr).val(),
             isPercent = $('[name="invoice_product_discount[]"]', tr).val().indexOf('%') > -1,
             percent = $.trim($('[name="invoice_product_discount[]"]', tr).val().replace('%', '')),
-	        subtotal = parseInt(quantity) * parseFloat(price);
+	        subtotal = quantity * (parseFloat(price) || 0);
 
         if(percent && $.isNumeric(percent) && percent !== 0) {
             if(isPercent){
@@ -365,13 +418,13 @@ $(document).ready(function() {
 	    
 	    var grandTotal = 0,
 	    	disc = 0,
-	    	c_ship = parseInt($('.calculate.shipping').val()) || 0;
+	    	c_ship = parseFloat($('.calculate.shipping').val()) || 0;
 
 	    $('#invoice_table tbody tr').each(function() {
             var c_sbt = $('.calculate-sub', this).val(),
-                quantity = $('[name="invoice_product_qty[]"]', this).val(),
+	            quantity = parseFloat($('[name="invoice_product_qty[]"]', this).val()) || 0,
 	            price = $('[name="invoice_product_price[]"]', this).val() || 0,
-                subtotal = parseInt(quantity) * parseFloat(price);
+	            subtotal = quantity * parseFloat(price);
             
             grandTotal += parseFloat(c_sbt);
             disc += subtotal - parseFloat(c_sbt);
@@ -801,6 +854,7 @@ $(document).ready(function() {
 
 				renderSuggestedProducts(templates);
 				loadServiceBundles();
+				loadRecurringPlans();
 				$('#response').removeClass('alert-warning').addClass('alert-success').fadeIn();
 				$('#response .message').html('<strong>Success</strong>: IT service templates processed. Added ' + escapeHtml(String(addedCount)) + ', skipped ' + escapeHtml(String(skippedCount)) + '.');
 				$('html, body').animate({ scrollTop: $('#response').offset().top }, 600);
@@ -829,6 +883,25 @@ $(document).ready(function() {
 
 				serviceBundles = data.data && data.data.bundles ? data.data.bundles : [];
 				renderServiceBundles(serviceBundles);
+			}
+		});
+	}
+
+	function loadRecurringPlans() {
+		$.ajax({
+			url: 'response.php',
+			type: 'POST',
+			dataType: 'json',
+			data: {
+				action: 'get_recurring_service_plans'
+			},
+			success: function(data) {
+				if (data.status !== 'Success') {
+					return;
+				}
+
+				recurringPlans = data.data && data.data.plans ? data.data.plans : [];
+				renderRecurringPlans(recurringPlans);
 			}
 		});
 	}
@@ -866,6 +939,34 @@ $(document).ready(function() {
 		$('#service_bundles_panel').show();
 	}
 
+	function renderRecurringPlans(plans) {
+		var html = '';
+
+		if (!plans || plans.length === 0) {
+			$('#recurring_plans_list').empty();
+			$('#recurring_plans_panel').hide();
+			return;
+		}
+
+		$.each(plans, function(index, plan) {
+			html += '' +
+				'<div class="col-sm-6 col-md-4">' +
+					'<div class="panel panel-warning">' +
+						'<div class="panel-heading"><strong>' + escapeHtml(plan.plan_name || 'Monthly Plan') + '</strong></div>' +
+						'<div class="panel-body">' +
+							'<p>' + escapeHtml(plan.plan_desc || '') + '</p>' +
+							'<p><strong>Cycle:</strong> Monthly</p>' +
+							'<p><strong>Price:</strong> ' + escapeHtml(String(plan.product_price || '0.00')) + '</p>' +
+							'<a href="#" class="btn btn-warning btn-xs apply-recurring-plan" data-plan-index="' + index + '">Apply Monthly Plan</a>' +
+						'</div>' +
+					'</div>' +
+				'</div>';
+		});
+
+		$('#recurring_plans_list').html(html);
+		$('#recurring_plans_panel').show();
+	}
+
 	function applyServiceBundle(bundle) {
 		if (!bundle || !bundle.items) {
 			return;
@@ -887,6 +988,167 @@ $(document).ready(function() {
 		$('#response .message').html('<strong>Success</strong>: ' + escapeHtml(bundle.bundle_name || 'Service bundle') + ' applied to the invoice.');
 		$('html, body').animate({ scrollTop: $('#response').offset().top }, 600);
 		calculateTotal();
+	}
+
+	function applyRecurringPlan(plan) {
+		if (!plan) {
+			return;
+		}
+
+		var $tbody = $('#invoice_table tbody');
+		$tbody.empty();
+		addInvoiceItemRow({
+			product: plan.product_name || '',
+			price: plan.product_price || '',
+			qty: 1,
+			discount: ''
+		});
+
+		$('#response').removeClass('alert-warning').addClass('alert-success').fadeIn();
+		$('#response .message').html('<strong>Success</strong>: ' + escapeHtml(plan.plan_name || 'Recurring plan') + ' added to the invoice.');
+		$('html, body').animate({ scrollTop: $('#response').offset().top }, 600);
+		calculateTotal();
+	}
+
+	function actionCreateServiceBundle() {
+		var $form = $('#create_service_bundle');
+		if (!$form.length) {
+			return;
+		}
+
+		var $btn = $('#action_create_service_bundle').button('loading');
+		$.ajax({
+			url: 'response.php',
+			type: 'POST',
+			dataType: 'json',
+			data: $form.serialize(),
+			success: function(data) {
+				$('#response .message').html('<strong>' + data.status + '</strong>: ' + data.message);
+				$('#response').removeClass('alert-warning').addClass(data.status === 'Success' ? 'alert-success' : 'alert-warning').fadeIn();
+				$btn.button('reset');
+				if (data.status === 'Success') {
+					window.location.reload();
+				}
+			},
+			error: function() {
+				$('#response .message').html('<strong>Error</strong>: Unable to create custom service bundle.');
+				$('#response').removeClass('alert-success').addClass('alert-warning').fadeIn();
+				$btn.button('reset');
+			}
+		});
+	}
+
+	function deleteServiceBundle(bundleId, bundleRow) {
+		$.ajax({
+			url: 'response.php',
+			type: 'POST',
+			dataType: 'json',
+			data: {
+				action: 'delete_service_bundle',
+				bundle_id: bundleId
+			},
+			success: function(data) {
+				$('#response .message').html('<strong>' + data.status + '</strong>: ' + data.message);
+				$('#response').removeClass('alert-success').addClass(data.status === 'Success' ? 'alert-success' : 'alert-warning').fadeIn();
+				if (data.status === 'Success' && bundleRow) {
+					bundleRow.remove();
+				}
+			},
+			error: function() {
+				$('#response .message').html('<strong>Error</strong>: Unable to delete custom service bundle.');
+				$('#response').removeClass('alert-success').addClass('alert-warning').fadeIn();
+			}
+		});
+	}
+
+	function addBundleItemRow() {
+		var $tbody = $('#bundle_items_table tbody');
+		var $template = $tbody.find('tr:first').clone();
+		$template.find('select').val('');
+		$template.find('input').val('1');
+		$tbody.append($template);
+	}
+
+	function loadCurrencyRates() {
+		if (!$('#currency_from').length || !$('#currency_to').length) {
+			return;
+		}
+
+		$.ajax({
+			url: 'response.php',
+			type: 'POST',
+			dataType: 'json',
+			data: {
+				action: 'get_currency_rates'
+			},
+			success: function(data) {
+				if (data.status !== 'Success' || !data.data || !data.data.rates) {
+					$('#currency_conversion_result').text('Unable to load exchange rates.');
+					return;
+				}
+
+				currencyRates = data.data.rates;
+				currencyBase = data.data.base || 'USD';
+				populateCurrencyOptions(currencyRates);
+				$('#currency_conversion_result').text('Rates loaded (base ' + currencyBase + '). Enter an amount and convert.');
+			},
+			error: function() {
+				$('#currency_conversion_result').text('Unable to load exchange rates.');
+			}
+		});
+	}
+
+	function populateCurrencyOptions(rates) {
+		var currencies = Object.keys(rates).sort();
+		var optionsHtml = '';
+
+		$.each(currencies, function(_, code) {
+			optionsHtml += '<option value="' + escapeHtml(code) + '">' + escapeHtml(code) + '</option>';
+		});
+
+		$('#currency_from').html(optionsHtml);
+		$('#currency_to').html(optionsHtml);
+		$('#currency_from').val('USD');
+		$('#currency_to').val('ZAR');
+	}
+
+	function convertCurrencyAmount() {
+		if (!currencyRates) {
+			$('#currency_conversion_result').text('Exchange rates are not loaded yet.');
+			return;
+		}
+
+		var amount = parseFloat($('#currency_amount').val());
+		var from = $('#currency_from').val();
+		var to = $('#currency_to').val();
+
+		if (!isFinite(amount) || amount <= 0) {
+			$('#currency_conversion_result').text('Enter a valid amount greater than zero.');
+			return;
+		}
+
+		if (!currencyRates[from] || !currencyRates[to]) {
+			$('#currency_conversion_result').text('Select valid source and target currencies.');
+			return;
+		}
+
+		var amountInBase = amount / parseFloat(currencyRates[from]);
+		var converted = amountInBase * parseFloat(currencyRates[to]);
+		lastConvertedAmount = converted;
+
+		$('#currency_conversion_result').text(amount.toFixed(2) + ' ' + from + ' = ' + converted.toFixed(2) + ' ' + to + ' (base ' + currencyBase + ').');
+	}
+
+	function applyConversionToShipping() {
+		if (lastConvertedAmount === null) {
+			$('#currency_conversion_result').text('Convert an amount first, then apply it to shipping.');
+			return;
+		}
+
+		$('input[name="invoice_shipping"]').val(lastConvertedAmount.toFixed(2));
+		calculateTotal();
+		$('#response').removeClass('alert-warning').addClass('alert-success').fadeIn();
+		$('#response .message').html('<strong>Success</strong>: Converted amount applied to shipping.');
 	}
 
 	function ensureSingleEmptyInvoiceRow() {

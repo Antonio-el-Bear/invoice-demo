@@ -329,7 +329,7 @@ function getInvoiceReminders() {
 							<h4><a href="#" class="btn btn-success btn-xs add-row"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></a> Product</h4>
 						</th>
 						<th>
-							<h4>Qty</h4>
+							<h4>Qty / Hours</h4>
 						</th>
 						<th>
 							<h4>Price</h4>
@@ -353,7 +353,7 @@ function getInvoiceReminders() {
 						</td>
 						<td class="text-right">
 							<div class="form-group form-group-sm no-margin-bottom">
-								<input type="number" class="form-control invoice_product_qty calculate" name="invoice_product_qty[]" value="1">
+								<input type="number" step="0.25" min="0.25" class="form-control invoice_product_qty calculate" name="invoice_product_qty[]" value="1">
 							</div>
 						</td>
 						<td class="text-right">
@@ -394,6 +394,43 @@ function getInvoiceReminders() {
 				</div>
 				<div class="panel-body">
 					<div id="service_bundles_list" class="row"></div>
+				</div>
+			</div>
+			<div id="recurring_plans_panel" class="panel panel-default" style="display:none;">
+				<div class="panel-heading">
+					<h4 class="float-left">Recurring Monthly Plans</h4>
+					<div class="clear"></div>
+				</div>
+				<div class="panel-body">
+					<div id="recurring_plans_list" class="row"></div>
+				</div>
+			</div>
+			<div id="currency_converter_panel" class="panel panel-default">
+				<div class="panel-heading">
+					<h4 class="float-left">Currency Converter</h4>
+					<div class="clear"></div>
+				</div>
+				<div class="panel-body form-group form-group-sm">
+					<div class="row">
+						<div class="col-xs-3">
+							<input type="number" step="0.01" min="0" id="currency_amount" class="form-control" placeholder="Amount">
+						</div>
+						<div class="col-xs-3">
+							<select id="currency_from" class="form-control"></select>
+						</div>
+						<div class="col-xs-3">
+							<select id="currency_to" class="form-control"></select>
+						</div>
+						<div class="col-xs-3 text-right">
+							<a href="#" id="convert_currency" class="btn btn-info btn-sm">Convert</a>
+							<a href="#" id="apply_conversion_shipping" class="btn btn-success btn-sm">Apply To Shipping</a>
+						</div>
+					</div>
+					<div class="row margin-top">
+						<div class="col-xs-12">
+							<p id="currency_conversion_result" class="text-muted">Load rates and convert an amount to another currency.</p>
+						</div>
+					</div>
 				</div>
 			</div>
 			<div id="invoice_totals" class="padding-right row text-right">

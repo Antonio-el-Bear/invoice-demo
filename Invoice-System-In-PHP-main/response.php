@@ -39,6 +39,7 @@ function getDefaultItServiceTemplates() {
 			'product_name' => 'Remote IT Support',
 			'product_desc' => 'Remote troubleshooting, software fixes, and user support.',
 			'product_price' => '650.00',
+			'category' => 'standard',
 			'usage_count' => 0,
 			'source_label' => 'IT service template'
 		),
@@ -46,6 +47,7 @@ function getDefaultItServiceTemplates() {
 			'product_name' => 'On-Site IT Support',
 			'product_desc' => 'Callout support for workstation, printer, and office IT issues.',
 			'product_price' => '950.00',
+			'category' => 'standard',
 			'usage_count' => 0,
 			'source_label' => 'IT service template'
 		),
@@ -53,6 +55,7 @@ function getDefaultItServiceTemplates() {
 			'product_name' => 'Network Setup And Troubleshooting',
 			'product_desc' => 'Router, switch, Wi-Fi, and structured network support services.',
 			'product_price' => '1800.00',
+			'category' => 'standard',
 			'usage_count' => 0,
 			'source_label' => 'IT service template'
 		),
@@ -60,6 +63,7 @@ function getDefaultItServiceTemplates() {
 			'product_name' => 'Microsoft 365 Setup',
 			'product_desc' => 'Mailbox setup, licensing, user onboarding, and tenant support.',
 			'product_price' => '1200.00',
+			'category' => 'standard',
 			'usage_count' => 0,
 			'source_label' => 'IT service template'
 		),
@@ -67,10 +71,155 @@ function getDefaultItServiceTemplates() {
 			'product_name' => 'Website Maintenance',
 			'product_desc' => 'Website updates, uptime checks, backups, and minor content changes.',
 			'product_price' => '1500.00',
+			'category' => 'standard',
 			'usage_count' => 0,
 			'source_label' => 'IT service template'
+		),
+		array(
+			'product_name' => 'Cybersecurity Assessment',
+			'product_desc' => 'Baseline security review covering endpoint, password, and network risks.',
+			'product_price' => '2800.00',
+			'category' => 'standard',
+			'usage_count' => 0,
+			'source_label' => 'IT service template'
+		),
+		array(
+			'product_name' => 'Data Backup And Recovery',
+			'product_desc' => 'Backup setup, recovery planning, and restoration support for business data.',
+			'product_price' => '2200.00',
+			'category' => 'standard',
+			'usage_count' => 0,
+			'source_label' => 'IT service template'
+		),
+		array(
+			'product_name' => 'Cloud Migration Support',
+			'product_desc' => 'Migration of files, mailboxes, and workloads to modern cloud platforms.',
+			'product_price' => '3500.00',
+			'category' => 'standard',
+			'usage_count' => 0,
+			'source_label' => 'IT service template'
+		),
+		array(
+			'product_name' => 'Laptop And Desktop Setup',
+			'product_desc' => 'New device setup, software installation, and end-user readiness configuration.',
+			'product_price' => '700.00',
+			'category' => 'standard',
+			'usage_count' => 0,
+			'source_label' => 'IT service template'
+		),
+		array(
+			'product_name' => 'Email Security And Anti-Spam',
+			'product_desc' => 'Mail flow protection, spam filtering, and phishing hardening for business email.',
+			'product_price' => '900.00',
+			'category' => 'standard',
+			'usage_count' => 0,
+			'source_label' => 'IT service template'
+		),
+		array(
+			'product_name' => 'Server Maintenance',
+			'product_desc' => 'Server health checks, patching, updates, and performance maintenance.',
+			'product_price' => '2600.00',
+			'category' => 'standard',
+			'usage_count' => 0,
+			'source_label' => 'IT service template'
+		),
+		array(
+			'product_name' => 'Managed IT Bronze Monthly',
+			'product_desc' => 'Monthly support retainer for light business IT support needs.',
+			'product_price' => '2500.00',
+			'category' => 'recurring',
+			'usage_count' => 0,
+			'source_label' => 'Recurring monthly plan'
+		),
+		array(
+			'product_name' => 'Managed IT Silver Monthly',
+			'product_desc' => 'Monthly managed service plan for growing teams needing regular support.',
+			'product_price' => '4500.00',
+			'category' => 'recurring',
+			'usage_count' => 0,
+			'source_label' => 'Recurring monthly plan'
+		),
+		array(
+			'product_name' => 'Managed IT Gold Monthly',
+			'product_desc' => 'Premium monthly support plan with priority service and broader coverage.',
+			'product_price' => '7500.00',
+			'category' => 'recurring',
+			'usage_count' => 0,
+			'source_label' => 'Recurring monthly plan'
+		),
+		array(
+			'product_name' => 'Website Care Monthly',
+			'product_desc' => 'Monthly website monitoring, updates, backups, and maintenance coverage.',
+			'product_price' => '1800.00',
+			'category' => 'recurring',
+			'usage_count' => 0,
+			'source_label' => 'Recurring monthly plan'
+		),
+		array(
+			'product_name' => 'Backup Monitoring Monthly',
+			'product_desc' => 'Monthly backup verification, alerting, and recovery readiness service.',
+			'product_price' => '1600.00',
+			'category' => 'recurring',
+			'usage_count' => 0,
+			'source_label' => 'Recurring monthly plan'
+		),
+		array(
+			'product_name' => 'Hourly Remote Support',
+			'product_desc' => 'Hourly remote IT support billed by time spent.',
+			'product_price' => '350.00',
+			'category' => 'hourly',
+			'usage_count' => 0,
+			'source_label' => 'Hourly service'
+		),
+		array(
+			'product_name' => 'Hourly On-Site Support',
+			'product_desc' => 'Hourly on-site technical support billed by hours worked.',
+			'product_price' => '550.00',
+			'category' => 'hourly',
+			'usage_count' => 0,
+			'source_label' => 'Hourly service'
+		),
+		array(
+			'product_name' => 'Hourly Developer Support',
+			'product_desc' => 'Hourly application, website, or systems development support.',
+			'product_price' => '650.00',
+			'category' => 'hourly',
+			'usage_count' => 0,
+			'source_label' => 'Hourly service'
 		)
 	);
+}
+
+function ensureServiceBundleTables($mysqli) {
+	$mysqli->query("CREATE TABLE IF NOT EXISTS service_bundles (
+		id INT(11) NOT NULL AUTO_INCREMENT,
+		bundle_name VARCHAR(255) NOT NULL,
+		bundle_desc TEXT DEFAULT NULL,
+		billing_type VARCHAR(50) NOT NULL DEFAULT 'one-time',
+		created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+		PRIMARY KEY (id)
+	)");
+
+	$mysqli->query("CREATE TABLE IF NOT EXISTS service_bundle_items (
+		id INT(11) NOT NULL AUTO_INCREMENT,
+		bundle_id INT(11) NOT NULL,
+		product_name VARCHAR(255) NOT NULL,
+		qty DECIMAL(10,2) NOT NULL DEFAULT 1.00,
+		created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		PRIMARY KEY (id),
+		KEY bundle_id (bundle_id)
+	)");
+}
+
+function getTemplatesByCategory($category) {
+	$templates = array();
+	foreach (getDefaultItServiceTemplates() as $template) {
+		if (isset($template['category']) && $template['category'] === $category) {
+			$templates[] = $template;
+		}
+	}
+	return $templates;
 }
 
 function getProductPriceByName($mysqli, $productName) {
@@ -100,11 +249,97 @@ function getProductPriceByName($mysqli, $productName) {
 	return '';
 }
 
+function getProductDescriptionByName($productName) {
+	foreach (getDefaultItServiceTemplates() as $template) {
+		if ($template['product_name'] === $productName) {
+			return $template['product_desc'];
+		}
+	}
+	return '';
+}
+
+function buildBundlePayload($mysqli, $bundleName, $bundleDesc, $billingType, $itemDefinitions) {
+	$total = 0;
+	$items = array();
+
+	foreach ($itemDefinitions as $item) {
+		$productName = isset($item['product_name']) ? $item['product_name'] : '';
+		$qty = isset($item['qty']) ? (float)$item['qty'] : 1;
+		$price = getProductPriceByName($mysqli, $productName);
+		$lineTotal = ((float)$price) * $qty;
+		$total += $lineTotal;
+		$items[] = array(
+			'product_name' => $productName,
+			'qty' => $qty,
+			'product_price' => $price,
+			'line_total' => number_format($lineTotal, 2, '.', '')
+		);
+	}
+
+	return array(
+		'bundle_name' => $bundleName,
+		'bundle_desc' => $bundleDesc,
+		'billing_type' => $billingType,
+		'bundle_total' => number_format($total, 2, '.', ''),
+		'items' => $items
+	);
+}
+
+function getCustomServiceBundles($mysqli) {
+	ensureServiceBundleTables($mysqli);
+	$bundles = array();
+	$result = $mysqli->query("SELECT id, bundle_name, bundle_desc, billing_type FROM service_bundles ORDER BY bundle_name ASC");
+
+	if (!$result) {
+		return $bundles;
+	}
+
+	while ($bundle = $result->fetch_assoc()) {
+		$itemStmt = $mysqli->prepare("SELECT product_name, qty FROM service_bundle_items WHERE bundle_id = ? ORDER BY id ASC");
+		if (!$itemStmt) {
+			continue;
+		}
+		$itemStmt->bind_param('i', $bundle['id']);
+		$itemStmt->execute();
+		$itemResult = $itemStmt->get_result();
+		$itemDefinitions = array();
+		while ($itemRow = $itemResult->fetch_assoc()) {
+			$itemDefinitions[] = array(
+				'product_name' => $itemRow['product_name'],
+				'qty' => $itemRow['qty']
+			);
+		}
+		$itemStmt->close();
+
+		$payload = buildBundlePayload($mysqli, $bundle['bundle_name'], $bundle['bundle_desc'], $bundle['billing_type'], $itemDefinitions);
+		$payload['bundle_id'] = (int)$bundle['id'];
+		$payload['source_label'] = 'Custom bundle';
+		$bundles[] = $payload;
+	}
+
+	return $bundles;
+}
+
+function getDefaultCurrencyRates() {
+	return array(
+		'USD' => 1.00,
+		'EUR' => 0.92,
+		'GBP' => 0.79,
+		'ZAR' => 18.50,
+		'AED' => 3.67,
+		'KES' => 129.00,
+		'NGN' => 1520.00,
+		'INR' => 83.20
+	);
+}
+
 function getServiceBundles($mysqli) {
+	ensureServiceBundleTables($mysqli);
 	$bundleTemplates = array(
 		array(
 			'bundle_name' => 'Managed IT Monthly Plan',
 			'bundle_desc' => 'Recurring support package for SMEs with maintenance and user support.',
+			'billing_type' => 'monthly',
 			'items' => array(
 				array('product_name' => 'Remote IT Support', 'qty' => 4),
 				array('product_name' => 'Website Maintenance', 'qty' => 1)
@@ -113,6 +348,7 @@ function getServiceBundles($mysqli) {
 		array(
 			'bundle_name' => 'New Office Setup Package',
 			'bundle_desc' => 'Network rollout and onboarding support for a new office or branch.',
+			'billing_type' => 'one-time',
 			'items' => array(
 				array('product_name' => 'Network Setup And Troubleshooting', 'qty' => 1),
 				array('product_name' => 'On-Site IT Support', 'qty' => 2),
@@ -122,40 +358,71 @@ function getServiceBundles($mysqli) {
 		array(
 			'bundle_name' => 'Business Continuity Starter',
 			'bundle_desc' => 'Preventive support and operational continuity services.',
+			'billing_type' => 'one-time',
 			'items' => array(
 				array('product_name' => 'Remote IT Support', 'qty' => 2),
 				array('product_name' => 'On-Site IT Support', 'qty' => 1),
 				array('product_name' => 'Website Maintenance', 'qty' => 1)
+			)
+		),
+		array(
+			'bundle_name' => 'Security Hardening Package',
+			'bundle_desc' => 'Practical security improvement package for small and growing businesses.',
+			'billing_type' => 'one-time',
+			'items' => array(
+				array('product_name' => 'Cybersecurity Assessment', 'qty' => 1),
+				array('product_name' => 'Email Security And Anti-Spam', 'qty' => 1),
+				array('product_name' => 'Remote IT Support', 'qty' => 1)
+			)
+		),
+		array(
+			'bundle_name' => 'Cloud Productivity Upgrade',
+			'bundle_desc' => 'Cloud onboarding package for collaboration, migration, and user setup.',
+			'billing_type' => 'one-time',
+			'items' => array(
+				array('product_name' => 'Microsoft 365 Setup', 'qty' => 1),
+				array('product_name' => 'Cloud Migration Support', 'qty' => 1),
+				array('product_name' => 'Laptop And Desktop Setup', 'qty' => 3)
+			)
+		),
+		array(
+			'bundle_name' => 'Backup And Recovery Package',
+			'bundle_desc' => 'Business data protection package with backup design and recovery readiness.',
+			'billing_type' => 'one-time',
+			'items' => array(
+				array('product_name' => 'Data Backup And Recovery', 'qty' => 1),
+				array('product_name' => 'Server Maintenance', 'qty' => 1),
+				array('product_name' => 'Remote IT Support', 'qty' => 1)
 			)
 		)
 	);
 
 	$bundles = array();
 	foreach ($bundleTemplates as $bundle) {
-		$total = 0;
-		$items = array();
+		$payload = buildBundlePayload($mysqli, $bundle['bundle_name'], $bundle['bundle_desc'], $bundle['billing_type'], $bundle['items']);
+		$payload['source_label'] = 'Built-in bundle';
+		$bundles[] = $payload;
+	}
 
-		foreach ($bundle['items'] as $item) {
-			$price = getProductPriceByName($mysqli, $item['product_name']);
-			$lineTotal = ((float)$price) * ((int)$item['qty']);
-			$total += $lineTotal;
-			$items[] = array(
-				'product_name' => $item['product_name'],
-				'qty' => (int)$item['qty'],
-				'product_price' => $price,
-				'line_total' => number_format($lineTotal, 2, '.', '')
-			);
-		}
-
-		$bundles[] = array(
-			'bundle_name' => $bundle['bundle_name'],
-			'bundle_desc' => $bundle['bundle_desc'],
-			'bundle_total' => number_format($total, 2, '.', ''),
-			'items' => $items
-		);
+	foreach (getCustomServiceBundles($mysqli) as $customBundle) {
+		$bundles[] = $customBundle;
 	}
 
 	return $bundles;
+}
+
+function getRecurringServicePlans($mysqli) {
+	$plans = array();
+	foreach (getTemplatesByCategory('recurring') as $template) {
+		$plans[] = array(
+			'plan_name' => $template['product_name'],
+			'plan_desc' => $template['product_desc'],
+			'billing_cycle' => 'monthly',
+			'product_name' => $template['product_name'],
+			'product_price' => getProductPriceByName($mysqli, $template['product_name'])
+		);
+	}
+	return $plans;
 }
 
 function buildCustomerProfileFromRequest() {
@@ -362,6 +629,117 @@ if ($action == 'get_service_bundles') {
 		'data' => array(
 			'bundles' => getServiceBundles($mysqli)
 		)
+	));
+	exit;
+}
+
+if ($action == 'get_currency_rates') {
+	header('Content-Type: application/json');
+
+	echo json_encode(array(
+		'status' => 'Success',
+		'message' => 'Currency rates loaded.',
+		'data' => array(
+			'base' => 'USD',
+			'rates' => getDefaultCurrencyRates()
+		)
+	));
+	exit;
+}
+
+if ($action == 'get_recurring_service_plans') {
+	header('Content-Type: application/json');
+
+	echo json_encode(array(
+		'status' => 'Success',
+		'message' => 'Recurring service plans loaded.',
+		'data' => array(
+			'plans' => getRecurringServicePlans($mysqli)
+		)
+	));
+	exit;
+}
+
+if ($action == 'create_service_bundle') {
+	header('Content-Type: application/json');
+	ensureServiceBundleTables($mysqli);
+
+	$bundleName = isset($_POST['bundle_name']) ? trim($_POST['bundle_name']) : '';
+	$bundleDesc = isset($_POST['bundle_desc']) ? trim($_POST['bundle_desc']) : '';
+	$billingType = isset($_POST['billing_type']) ? trim($_POST['billing_type']) : 'one-time';
+	$productNames = isset($_POST['bundle_product_name']) ? $_POST['bundle_product_name'] : array();
+	$productQtys = isset($_POST['bundle_product_qty']) ? $_POST['bundle_product_qty'] : array();
+
+	if ($bundleName === '') {
+		echo json_encode(array('status' => 'Error', 'message' => 'Bundle name is required.'));
+		exit;
+	}
+
+	$itemDefinitions = array();
+	foreach ($productNames as $index => $productName) {
+		$productName = trim($productName);
+		$qty = isset($productQtys[$index]) ? (float)$productQtys[$index] : 0;
+		if ($productName === '' || $qty <= 0) {
+			continue;
+		}
+		$itemDefinitions[] = array('product_name' => $productName, 'qty' => $qty);
+	}
+
+	if (count($itemDefinitions) === 0) {
+		echo json_encode(array('status' => 'Error', 'message' => 'Add at least one bundle item with a valid quantity.'));
+		exit;
+	}
+
+	$insertBundle = $mysqli->prepare("INSERT INTO service_bundles (bundle_name, bundle_desc, billing_type) VALUES (?, ?, ?)");
+	if (!$insertBundle) {
+		echo json_encode(array('status' => 'Error', 'message' => 'Unable to create bundle header.'));
+		exit;
+	}
+	$insertBundle->bind_param('sss', $bundleName, $bundleDesc, $billingType);
+	if (!$insertBundle->execute()) {
+		$insertBundle->close();
+		echo json_encode(array('status' => 'Error', 'message' => 'Unable to save service bundle.'));
+		exit;
+	}
+	$bundleId = $insertBundle->insert_id;
+	$insertBundle->close();
+
+	$insertItem = $mysqli->prepare("INSERT INTO service_bundle_items (bundle_id, product_name, qty) VALUES (?, ?, ?)");
+	foreach ($itemDefinitions as $item) {
+		$productName = $item['product_name'];
+		$qty = $item['qty'];
+		$insertItem->bind_param('isd', $bundleId, $productName, $qty);
+		$insertItem->execute();
+	}
+	$insertItem->close();
+
+	echo json_encode(array('status' => 'Success', 'message' => 'Custom service bundle created successfully.'));
+	exit;
+}
+
+if ($action == 'delete_service_bundle') {
+	header('Content-Type: application/json');
+	ensureServiceBundleTables($mysqli);
+
+	$bundleId = isset($_POST['bundle_id']) ? (int)$_POST['bundle_id'] : 0;
+	if ($bundleId <= 0) {
+		echo json_encode(array('status' => 'Error', 'message' => 'Invalid bundle selected.'));
+		exit;
+	}
+
+	$deleteItems = $mysqli->prepare("DELETE FROM service_bundle_items WHERE bundle_id = ?");
+	$deleteItems->bind_param('i', $bundleId);
+	$deleteItems->execute();
+	$deleteItems->close();
+
+	$deleteBundle = $mysqli->prepare("DELETE FROM service_bundles WHERE id = ?");
+	$deleteBundle->bind_param('i', $bundleId);
+	$success = $deleteBundle->execute();
+	$deleteBundle->close();
+
+	echo json_encode(array(
+		'status' => $success ? 'Success' : 'Error',
+		'message' => $success ? 'Custom service bundle deleted successfully.' : 'Unable to delete service bundle.'
 	));
 	exit;
 }

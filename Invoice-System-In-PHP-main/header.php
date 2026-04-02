@@ -161,6 +161,8 @@
           <ul class="treeview-menu">
             <li><a href="product-add.php"><i class="fa fa-plus"></i>Add Products</a></li>
             <li><a href="product-list.php"><i class="fa fa-cog"></i>Manage Products</a></li>
+			<li><a href="recurring-plans.php"><i class="fa fa-refresh"></i>Recurring Plans</a></li>
+			<li><a href="service-bundles.php"><i class="fa fa-cubes"></i>Service Bundles</a></li>
           </ul>
         </li>
         <!-- Menu 3 -->
