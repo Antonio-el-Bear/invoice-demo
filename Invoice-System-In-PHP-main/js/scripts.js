@@ -7,6 +7,7 @@
 
 $(document).ready(function() {
 	var autoFillMatches = [];
+	var serviceBundles = [];
 
 	// Invoice Type
 	$('#invoice_type').change(function() {
@@ -192,6 +193,17 @@ $(document).ready(function() {
 		seedItServiceCatalog();
 	});
 
+	$(document).on('click', '.apply-service-bundle', function(e) {
+		e.preventDefault();
+
+		var bundleIndex = parseInt($(this).attr('data-bundle-index'), 10);
+		if (isNaN(bundleIndex) || !serviceBundles[bundleIndex]) {
+			return;
+		}
+
+		applyServiceBundle(serviceBundles[bundleIndex]);
+	});
+
 	$(document).on('click', ".item-select", function(e) {
 
    		e.preventDefault;
@@ -324,6 +336,8 @@ $(document).ready(function() {
 	$('.remove_vat').on('change', function() {
         calculateTotal();
     });
+
+	loadServiceBundles();
 
 	function updateTotals(elem) {
 
@@ -786,6 +800,7 @@ $(document).ready(function() {
 				var templates = data.data && data.data.templates ? data.data.templates : [];
 
 				renderSuggestedProducts(templates);
+				loadServiceBundles();
 				$('#response').removeClass('alert-warning').addClass('alert-success').fadeIn();
 				$('#response .message').html('<strong>Success</strong>: IT service templates processed. Added ' + escapeHtml(String(addedCount)) + ', skipped ' + escapeHtml(String(skippedCount)) + '.');
 				$('html, body').animate({ scrollTop: $('#response').offset().top }, 600);
@@ -797,6 +812,81 @@ $(document).ready(function() {
 				$btn.button('reset');
 			}
 		});
+	}
+
+	function loadServiceBundles() {
+		$.ajax({
+			url: 'response.php',
+			type: 'POST',
+			dataType: 'json',
+			data: {
+				action: 'get_service_bundles'
+			},
+			success: function(data) {
+				if (data.status !== 'Success') {
+					return;
+				}
+
+				serviceBundles = data.data && data.data.bundles ? data.data.bundles : [];
+				renderServiceBundles(serviceBundles);
+			}
+		});
+	}
+
+	function renderServiceBundles(bundles) {
+		var html = '';
+
+		if (!bundles || bundles.length === 0) {
+			$('#service_bundles_list').empty();
+			$('#service_bundles_panel').hide();
+			return;
+		}
+
+		$.each(bundles, function(index, bundle) {
+			var itemsHtml = '';
+			$.each(bundle.items || [], function(_, item) {
+				itemsHtml += '<li>' + escapeHtml(item.product_name || '') + ' x ' + escapeHtml(String(item.qty || 1)) + '</li>';
+			});
+
+			html += '' +
+				'<div class="col-sm-6 col-md-4">' +
+					'<div class="panel panel-success">' +
+						'<div class="panel-heading"><strong>' + escapeHtml(bundle.bundle_name || 'Service Bundle') + '</strong></div>' +
+						'<div class="panel-body">' +
+							'<p>' + escapeHtml(bundle.bundle_desc || '') + '</p>' +
+							'<ul>' + itemsHtml + '</ul>' +
+							'<p><strong>Estimated Total:</strong> ' + escapeHtml(String(bundle.bundle_total || '0.00')) + '</p>' +
+							'<a href="#" class="btn btn-success btn-xs apply-service-bundle" data-bundle-index="' + index + '">Apply Bundle</a>' +
+						'</div>' +
+					'</div>' +
+				'</div>';
+		});
+
+		$('#service_bundles_list').html(html);
+		$('#service_bundles_panel').show();
+	}
+
+	function applyServiceBundle(bundle) {
+		if (!bundle || !bundle.items) {
+			return;
+		}
+
+		var $tbody = $('#invoice_table tbody');
+		$tbody.empty();
+
+		$.each(bundle.items, function(_, item) {
+			addInvoiceItemRow({
+				product: item.product_name || '',
+				price: item.product_price || '',
+				qty: item.qty || 1,
+				discount: ''
+			});
+		});
+
+		$('#response').removeClass('alert-warning').addClass('alert-success').fadeIn();
+		$('#response .message').html('<strong>Success</strong>: ' + escapeHtml(bundle.bundle_name || 'Service bundle') + ' applied to the invoice.');
+		$('html, body').animate({ scrollTop: $('#response').offset().top }, 600);
+		calculateTotal();
 	}
 
 	function ensureSingleEmptyInvoiceRow() {

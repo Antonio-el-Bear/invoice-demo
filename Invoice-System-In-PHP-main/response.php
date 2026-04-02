@@ -74,6 +74,7 @@ function getDefaultItServiceTemplates() {
 }
 
 function getProductPriceByName($mysqli, $productName) {
+	$price = '';
 	$stmt = $mysqli->prepare("SELECT product_price FROM products WHERE product_name = ? ORDER BY product_id DESC LIMIT 1");
 	if (!$stmt) {
 		return '';
