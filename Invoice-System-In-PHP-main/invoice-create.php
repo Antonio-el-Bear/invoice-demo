@@ -247,6 +247,7 @@ function getInvoiceReminders() {
 					<div class="panel panel-default">
 						<div class="panel-heading">
 							<h4 class="float-left">Customer Information</h4>
+							<a href="#" id="auto_fill_invoice" class="float-right btn btn-default btn-xs" data-loading-text="Filling...">Auto Fill Agent</a>
 							<a href="#" class="float-right select-customer"><b>OR</b> Select Existing Customer</a>
 							<div class="clear"></div>
 						</div>

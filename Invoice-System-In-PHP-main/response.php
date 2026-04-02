@@ -16,6 +16,114 @@ if ($mysqli->connect_error) {
 
 $action = isset($_POST['action']) ? $_POST['action'] : "";
 
+if ($action == 'auto_fill_invoice') {
+	header('Content-Type: application/json');
+
+	$customer_email = isset($_POST['customer_email']) ? trim($_POST['customer_email']) : '';
+	$customer_name = isset($_POST['customer_name']) ? trim($_POST['customer_name']) : '';
+
+	if ($customer_email === '' && $customer_name === '') {
+		echo json_encode(array(
+			'status' => 'Error',
+			'message' => 'Please provide customer email or name to auto fill.'
+		));
+		exit;
+	}
+
+	$conditions = array();
+	if ($customer_email !== '') {
+		$conditions[] = "c.email = '".$mysqli->real_escape_string($customer_email)."'";
+	}
+	if ($customer_name !== '') {
+		$conditions[] = "c.name LIKE '%".$mysqli->real_escape_string($customer_name)."%'";
+	}
+
+	$whereClause = implode(' OR ', $conditions);
+
+	$query = "SELECT c.*, i.id AS invoice_row_id, i.invoice
+				FROM customers c
+				LEFT JOIN invoices i ON i.invoice = c.invoice
+				WHERE ".$whereClause."
+				ORDER BY c.id DESC
+				LIMIT 1";
+
+	$customerResult = $mysqli->query($query);
+	$customerData = null;
+	$invoiceNumber = null;
+
+	if ($customerResult && $customerResult->num_rows > 0) {
+		$customerData = $customerResult->fetch_assoc();
+		$invoiceNumber = isset($customerData['invoice']) ? $customerData['invoice'] : null;
+	}
+
+	if (!$customerData) {
+		$fallbackConditions = array();
+		if ($customer_email !== '') {
+			$fallbackConditions[] = "email = '".$mysqli->real_escape_string($customer_email)."'";
+		}
+		if ($customer_name !== '') {
+			$fallbackConditions[] = "name LIKE '%".$mysqli->real_escape_string($customer_name)."%'";
+		}
+
+		$fallbackWhere = implode(' OR ', $fallbackConditions);
+		$fallbackQuery = "SELECT * FROM store_customers WHERE ".$fallbackWhere." ORDER BY id DESC LIMIT 1";
+		$fallbackResult = $mysqli->query($fallbackQuery);
+
+		if ($fallbackResult && $fallbackResult->num_rows > 0) {
+			$storeCustomer = $fallbackResult->fetch_assoc();
+			$customerData = array(
+				'name' => $storeCustomer['name'],
+				'email' => $storeCustomer['email'],
+				'phone' => $storeCustomer['phone'],
+				'address_1' => $storeCustomer['address_1'],
+				'address_2' => $storeCustomer['address_2'],
+				'town' => $storeCustomer['town'],
+				'county' => $storeCustomer['county'],
+				'postcode' => $storeCustomer['postcode'],
+				'name_ship' => $storeCustomer['name_ship'],
+				'address_1_ship' => $storeCustomer['address_1_ship'],
+				'address_2_ship' => $storeCustomer['address_2_ship'],
+				'town_ship' => $storeCustomer['town_ship'],
+				'county_ship' => $storeCustomer['county_ship'],
+				'postcode_ship' => $storeCustomer['postcode_ship']
+			);
+		}
+	}
+
+	if (!$customerData) {
+		echo json_encode(array(
+			'status' => 'Error',
+			'message' => 'No matching customer record found for auto fill.'
+		));
+		exit;
+	}
+
+	$items = array();
+	if (!empty($invoiceNumber)) {
+		$itemQuery = "SELECT product, qty, price, discount, subtotal
+					 FROM invoice_items
+					 WHERE invoice = '".$mysqli->real_escape_string($invoiceNumber)."'
+					 ORDER BY id ASC";
+		$itemResult = $mysqli->query($itemQuery);
+
+		if ($itemResult && $itemResult->num_rows > 0) {
+			while ($row = $itemResult->fetch_assoc()) {
+				$items[] = $row;
+			}
+		}
+	}
+
+	echo json_encode(array(
+		'status' => 'Success',
+		'message' => 'Auto fill completed from latest customer data.',
+		'data' => array(
+			'customer' => $customerData,
+			'items' => $items
+		)
+	));
+	exit;
+}
+
 if ($action == 'email_invoice'){
 
 	$fileId = $_POST['id'];

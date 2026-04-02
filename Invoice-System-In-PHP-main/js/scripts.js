@@ -148,6 +148,12 @@ $(document).ready(function() {
 	    actionCreateCustomer();
 	});
 
+	// auto fill invoice from most recent customer data
+	$(document).on('click', '#auto_fill_invoice', function(e) {
+		e.preventDefault();
+		autoFillInvoice();
+	});
+
 	$(document).on('click', ".item-select", function(e) {
 
    		e.preventDefault;
@@ -512,6 +518,95 @@ $(document).ready(function() {
 			});
 		}
 
+	}
+
+	function autoFillInvoice() {
+		var customerEmail = $.trim($("#customer_email").val());
+		var customerName = $.trim($("#customer_name").val());
+
+		if (customerEmail === "" && customerName === "") {
+			$("#response").removeClass("alert-success").addClass("alert-warning").fadeIn();
+			$("#response .message").html("<strong>Error</strong>: Enter customer email or name, then click Auto Fill Agent.");
+			$("#customer_email, #customer_name").parent().addClass("has-error");
+			$("html, body").animate({ scrollTop: $('#response').offset().top }, 600);
+			return;
+		}
+
+		$("#customer_email, #customer_name").parent().removeClass("has-error");
+
+		var $btn = $("#auto_fill_invoice").button("loading");
+
+		$.ajax({
+			url: 'response.php',
+			type: 'POST',
+			dataType: 'json',
+			data: {
+				action: 'auto_fill_invoice',
+				customer_email: customerEmail,
+				customer_name: customerName
+			},
+			success: function(data) {
+				if (data.status !== 'Success') {
+					$("#response").removeClass("alert-success").addClass("alert-warning").fadeIn();
+					$("#response .message").html("<strong>Notice</strong>: " + data.message);
+					$btn.button("reset");
+					return;
+				}
+
+				applyAutoFillData(data.data);
+				$("#response").removeClass("alert-warning").addClass("alert-success").fadeIn();
+				$("#response .message").html("<strong>Success</strong>: " + data.message);
+				$("html, body").animate({ scrollTop: $('#response').offset().top }, 600);
+				$btn.button("reset");
+			},
+			error: function() {
+				$("#response").removeClass("alert-success").addClass("alert-warning").fadeIn();
+				$("#response .message").html("<strong>Error</strong>: Auto Fill Agent failed. Please try again.");
+				$btn.button("reset");
+			}
+		});
+	}
+
+	function applyAutoFillData(payload) {
+		if (!payload || !payload.customer) {
+			return;
+		}
+
+		var customer = payload.customer;
+
+		$("#customer_name").val(customer.name || "");
+		$("#customer_email").val(customer.email || "");
+		$("#customer_phone").val(customer.phone || "");
+		$("#customer_address_1").val(customer.address_1 || "");
+		$("#customer_address_2").val(customer.address_2 || "");
+		$("#customer_town").val(customer.town || "");
+		$("#customer_county").val(customer.county || "");
+		$("#customer_postcode").val(customer.postcode || "");
+
+		$("#customer_name_ship").val(customer.name_ship || customer.name || "");
+		$("#customer_address_1_ship").val(customer.address_1_ship || customer.address_1 || "");
+		$("#customer_address_2_ship").val(customer.address_2_ship || customer.address_2 || "");
+		$("#customer_town_ship").val(customer.town_ship || customer.town || "");
+		$("#customer_county_ship").val(customer.county_ship || customer.county || "");
+		$("#customer_postcode_ship").val(customer.postcode_ship || customer.postcode || "");
+
+		if (payload.items && payload.items.length > 0) {
+			var $tbody = $('#invoice_table tbody');
+			var $template = $tbody.find('tr:first').clone();
+			$tbody.empty();
+
+			$.each(payload.items, function(_, item) {
+				var $row = $template.clone();
+				$row.find('.invoice_product').val(item.product || "");
+				$row.find('[name="invoice_product_qty[]"]').val(item.qty || 1);
+				$row.find('[name="invoice_product_price[]"]').val(item.price || "");
+				$row.find('[name="invoice_product_discount[]"]').val(item.discount || "");
+				$row.find('[name="invoice_product_sub[]"]').val(item.subtotal || "0.00");
+				$tbody.append($row);
+			});
+		}
+
+		calculateTotal();
 	}
 
    	function deleteProduct(productId) {
