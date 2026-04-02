@@ -487,6 +487,24 @@ function getInvoiceReminders() {
 		  </div>
 		</div>
 
+		<div id="auto_fill_matches" class="modal fade">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title">Choose A Client Profile</h4>
+		      </div>
+		      <div class="modal-body">
+				<p>Select the best match to auto fill the invoice.</p>
+				<div id="auto_fill_match_list" class="list-group"></div>
+		      </div>
+		      <div class="modal-footer">
+				<button type="button" data-dismiss="modal" class="btn">Cancel</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+
 <?php
 	include('footer.php');
 ?>

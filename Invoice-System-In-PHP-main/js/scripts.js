@@ -6,6 +6,7 @@
 *******************************************************************************/
 
 $(document).ready(function() {
+	var autoFillMatches = [];
 
 	// Invoice Type
 	$('#invoice_type').change(function() {
@@ -152,6 +153,21 @@ $(document).ready(function() {
 	$(document).on('click', '#auto_fill_invoice', function(e) {
 		e.preventDefault();
 		autoFillInvoice();
+	});
+
+	$(document).on('click', '.auto-fill-match', function(e) {
+		e.preventDefault();
+
+		var matchIndex = parseInt($(this).attr('data-match-index'), 10);
+		if (isNaN(matchIndex) || !autoFillMatches[matchIndex]) {
+			return;
+		}
+
+		applyAutoFillData(autoFillMatches[matchIndex]);
+		$('#auto_fill_matches').modal('hide');
+		$("#response").removeClass("alert-warning").addClass("alert-success").fadeIn();
+		$("#response .message").html("<strong>Success</strong>: Auto fill applied for " + escapeHtml(autoFillMatches[matchIndex].display_name || 'selected client') + ".");
+		$("html, body").animate({ scrollTop: $('#response').offset().top }, 600);
 	});
 
 	$(document).on('click', ".item-select", function(e) {
@@ -553,10 +569,27 @@ $(document).ready(function() {
 					return;
 				}
 
-				applyAutoFillData(data.data);
-				$("#response").removeClass("alert-warning").addClass("alert-success").fadeIn();
-				$("#response .message").html("<strong>Success</strong>: " + data.message);
-				$("html, body").animate({ scrollTop: $('#response').offset().top }, 600);
+				autoFillMatches = (data.data && data.data.matches) ? data.data.matches : [];
+
+				if (autoFillMatches.length === 0) {
+					$("#response").removeClass("alert-success").addClass("alert-warning").fadeIn();
+					$("#response .message").html("<strong>Notice</strong>: No matching customer record found for auto fill.");
+					$btn.button("reset");
+					return;
+				}
+
+				if (autoFillMatches.length === 1) {
+					applyAutoFillData(autoFillMatches[0]);
+					$("#response").removeClass("alert-warning").addClass("alert-success").fadeIn();
+					$("#response .message").html("<strong>Success</strong>: Auto fill applied from the best matching profile.");
+					$("html, body").animate({ scrollTop: $('#response').offset().top }, 600);
+				} else {
+					renderAutoFillMatches(autoFillMatches);
+					$('#auto_fill_matches').modal({ backdrop: 'static', keyboard: false });
+					$("#response").removeClass("alert-success").addClass("alert-warning").fadeIn();
+					$("#response .message").html("<strong>Choose</strong>: " + data.message);
+				}
+
 				$btn.button("reset");
 			},
 			error: function() {
@@ -565,6 +598,29 @@ $(document).ready(function() {
 				$btn.button("reset");
 			}
 		});
+	}
+
+	function renderAutoFillMatches(matches) {
+		var html = '';
+
+		$.each(matches, function(index, match) {
+			var invoiceInfo = match.invoice_number ? 'Last invoice #' + escapeHtml(match.invoice_number) : 'No previous invoice items';
+			var locationInfo = match.display_location ? '<div>' + escapeHtml(match.display_location) + '</div>' : '';
+			var emailInfo = match.display_email ? '<div>' + escapeHtml(match.display_email) + '</div>' : '<div>No email saved</div>';
+
+			html += '' +
+				'<a href="#" class="list-group-item auto-fill-match" data-match-index="' + index + '">' +
+					'<h4 class="list-group-item-heading">' + escapeHtml(match.display_name || 'Unnamed client') + '</h4>' +
+					'<p class="list-group-item-text">' +
+						'<strong>' + escapeHtml(match.source_label || 'Saved profile') + '</strong><br>' +
+						emailInfo +
+						locationInfo +
+						'<div>' + invoiceInfo + '</div>' +
+					'</p>' +
+				'</a>';
+		});
+
+		$('#auto_fill_match_list').html(html);
 	}
 
 	function applyAutoFillData(payload) {
@@ -607,6 +663,10 @@ $(document).ready(function() {
 		}
 
 		calculateTotal();
+	}
+
+	function escapeHtml(value) {
+		return $('<div>').text(value || '').html();
 	}
 
    	function deleteProduct(productId) {

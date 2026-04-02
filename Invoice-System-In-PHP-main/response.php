@@ -14,6 +14,81 @@ if ($mysqli->connect_error) {
     die('Error : ('. $mysqli->connect_errno .') '. $mysqli->connect_error);
 }
 
+function buildAutofillCustomerPayload($row) {
+	return array(
+		'name' => isset($row['name']) ? $row['name'] : '',
+		'email' => isset($row['email']) ? $row['email'] : '',
+		'phone' => isset($row['phone']) ? $row['phone'] : '',
+		'address_1' => isset($row['address_1']) ? $row['address_1'] : '',
+		'address_2' => isset($row['address_2']) ? $row['address_2'] : '',
+		'town' => isset($row['town']) ? $row['town'] : '',
+		'county' => isset($row['county']) ? $row['county'] : '',
+		'postcode' => isset($row['postcode']) ? $row['postcode'] : '',
+		'name_ship' => isset($row['name_ship']) ? $row['name_ship'] : '',
+		'address_1_ship' => isset($row['address_1_ship']) ? $row['address_1_ship'] : '',
+		'address_2_ship' => isset($row['address_2_ship']) ? $row['address_2_ship'] : '',
+		'town_ship' => isset($row['town_ship']) ? $row['town_ship'] : '',
+		'county_ship' => isset($row['county_ship']) ? $row['county_ship'] : '',
+		'postcode_ship' => isset($row['postcode_ship']) ? $row['postcode_ship'] : ''
+	);
+}
+
+function loadAutofillInvoiceItems($mysqli, $invoiceNumber) {
+	$items = array();
+
+	if (empty($invoiceNumber)) {
+		return $items;
+	}
+
+	$itemQuery = "SELECT product, qty, price, discount, subtotal
+				 FROM invoice_items
+				 WHERE invoice = '".$mysqli->real_escape_string($invoiceNumber)."'
+				 ORDER BY id ASC";
+	$itemResult = $mysqli->query($itemQuery);
+
+	if ($itemResult && $itemResult->num_rows > 0) {
+		while ($row = $itemResult->fetch_assoc()) {
+			$items[] = $row;
+		}
+	}
+
+	return $items;
+}
+
+function addAutofillMatches(&$matches, &$seenKeys, $result, $sourceLabel, $limit, $mysqli) {
+	if (!$result) {
+		return;
+	}
+
+	while (($row = $result->fetch_assoc()) && count($matches) < $limit) {
+		$dedupeKey = strtolower(trim((isset($row['email']) ? $row['email'] : ''))).'|'.strtolower(trim((isset($row['name']) ? $row['name'] : '')));
+		if (isset($seenKeys[$dedupeKey])) {
+			continue;
+		}
+
+		$seenKeys[$dedupeKey] = true;
+		$customer = buildAutofillCustomerPayload($row);
+		$invoiceNumber = isset($row['invoice']) ? $row['invoice'] : '';
+		$locationParts = array_filter(array(
+			isset($row['town']) ? $row['town'] : '',
+			isset($row['county']) ? $row['county'] : '',
+			isset($row['postcode']) ? $row['postcode'] : ''
+		));
+
+		$matches[] = array(
+			'source_label' => $sourceLabel,
+			'source_id' => isset($row['source_id']) ? $row['source_id'] : '',
+			'invoice_number' => $invoiceNumber,
+			'invoice_date' => isset($row['invoice_date']) ? $row['invoice_date'] : '',
+			'display_name' => isset($row['name']) ? $row['name'] : '',
+			'display_email' => isset($row['email']) ? $row['email'] : '',
+			'display_location' => implode(', ', $locationParts),
+			'customer' => $customer,
+			'items' => loadAutofillInvoiceItems($mysqli, $invoiceNumber)
+		);
+	}
+}
+
 $action = isset($_POST['action']) ? $_POST['action'] : "";
 
 if ($action == 'auto_fill_invoice') {
@@ -39,58 +114,33 @@ if ($action == 'auto_fill_invoice') {
 	}
 
 	$whereClause = implode(' OR ', $conditions);
+	$matches = array();
+	$seenKeys = array();
+	$matchLimit = 3;
 
-	$query = "SELECT c.*, i.id AS invoice_row_id, i.invoice
+	$query = "SELECT c.*, c.id AS source_id, i.invoice, i.invoice_date
 				FROM customers c
 				LEFT JOIN invoices i ON i.invoice = c.invoice
 				WHERE ".$whereClause."
 				ORDER BY c.id DESC
-				LIMIT 1";
-
+				LIMIT 6";
 	$customerResult = $mysqli->query($query);
-	$customerData = null;
-	$invoiceNumber = null;
+	addAutofillMatches($matches, $seenKeys, $customerResult, 'Previous invoice', $matchLimit, $mysqli);
 
-	if ($customerResult && $customerResult->num_rows > 0) {
-		$customerData = $customerResult->fetch_assoc();
-		$invoiceNumber = isset($customerData['invoice']) ? $customerData['invoice'] : null;
+	$fallbackConditions = array();
+	if ($customer_email !== '') {
+		$fallbackConditions[] = "email = '".$mysqli->real_escape_string($customer_email)."'";
+	}
+	if ($customer_name !== '') {
+		$fallbackConditions[] = "name LIKE '%".$mysqli->real_escape_string($customer_name)."%'";
 	}
 
-	if (!$customerData) {
-		$fallbackConditions = array();
-		if ($customer_email !== '') {
-			$fallbackConditions[] = "email = '".$mysqli->real_escape_string($customer_email)."'";
-		}
-		if ($customer_name !== '') {
-			$fallbackConditions[] = "name LIKE '%".$mysqli->real_escape_string($customer_name)."%'";
-		}
+	$fallbackWhere = implode(' OR ', $fallbackConditions);
+	$fallbackQuery = "SELECT *, id AS source_id FROM store_customers WHERE ".$fallbackWhere." ORDER BY id DESC LIMIT 6";
+	$fallbackResult = $mysqli->query($fallbackQuery);
+	addAutofillMatches($matches, $seenKeys, $fallbackResult, 'Saved customer', $matchLimit, $mysqli);
 
-		$fallbackWhere = implode(' OR ', $fallbackConditions);
-		$fallbackQuery = "SELECT * FROM store_customers WHERE ".$fallbackWhere." ORDER BY id DESC LIMIT 1";
-		$fallbackResult = $mysqli->query($fallbackQuery);
-
-		if ($fallbackResult && $fallbackResult->num_rows > 0) {
-			$storeCustomer = $fallbackResult->fetch_assoc();
-			$customerData = array(
-				'name' => $storeCustomer['name'],
-				'email' => $storeCustomer['email'],
-				'phone' => $storeCustomer['phone'],
-				'address_1' => $storeCustomer['address_1'],
-				'address_2' => $storeCustomer['address_2'],
-				'town' => $storeCustomer['town'],
-				'county' => $storeCustomer['county'],
-				'postcode' => $storeCustomer['postcode'],
-				'name_ship' => $storeCustomer['name_ship'],
-				'address_1_ship' => $storeCustomer['address_1_ship'],
-				'address_2_ship' => $storeCustomer['address_2_ship'],
-				'town_ship' => $storeCustomer['town_ship'],
-				'county_ship' => $storeCustomer['county_ship'],
-				'postcode_ship' => $storeCustomer['postcode_ship']
-			);
-		}
-	}
-
-	if (!$customerData) {
+	if (count($matches) === 0) {
 		echo json_encode(array(
 			'status' => 'Error',
 			'message' => 'No matching customer record found for auto fill.'
@@ -98,27 +148,11 @@ if ($action == 'auto_fill_invoice') {
 		exit;
 	}
 
-	$items = array();
-	if (!empty($invoiceNumber)) {
-		$itemQuery = "SELECT product, qty, price, discount, subtotal
-					 FROM invoice_items
-					 WHERE invoice = '".$mysqli->real_escape_string($invoiceNumber)."'
-					 ORDER BY id ASC";
-		$itemResult = $mysqli->query($itemQuery);
-
-		if ($itemResult && $itemResult->num_rows > 0) {
-			while ($row = $itemResult->fetch_assoc()) {
-				$items[] = $row;
-			}
-		}
-	}
-
 	echo json_encode(array(
 		'status' => 'Success',
-		'message' => 'Auto fill completed from latest customer data.',
+		'message' => count($matches) === 1 ? '1 matching profile found.' : 'Select the right client profile to auto fill.',
 		'data' => array(
-			'customer' => $customerData,
-			'items' => $items
+			'matches' => $matches
 		)
 	));
 	exit;
