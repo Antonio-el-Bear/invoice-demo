@@ -247,6 +247,7 @@ function getInvoiceReminders() {
 					<div class="panel panel-default">
 						<div class="panel-heading">
 							<h4 class="float-left">Customer Information</h4>
+							<a href="#" id="save_invoice_customer" class="float-right btn btn-primary btn-xs" data-loading-text="Saving...">Save Client Profile</a>
 							<a href="#" id="auto_fill_invoice" class="float-right btn btn-default btn-xs" data-loading-text="Filling...">Auto Fill Agent</a>
 							<a href="#" class="float-right select-customer"><b>OR</b> Select Existing Customer</a>
 							<div class="clear"></div>
@@ -376,6 +377,15 @@ function getInvoiceReminders() {
 					</tr>
 				</tbody>
 			</table>
+			<div id="suggested_products_panel" class="panel panel-default" style="display:none;">
+				<div class="panel-heading">
+					<h4 class="float-left">Suggested Products</h4>
+					<div class="clear"></div>
+				</div>
+				<div class="panel-body">
+					<div id="suggested_products_list" class="row"></div>
+				</div>
+			</div>
 			<div id="invoice_totals" class="padding-right row text-right">
 				<div class="col-xs-6">
 					<!-- FIX: was class-"form-control" — typo with dash instead of equals sign, broke the textarea styling -->
