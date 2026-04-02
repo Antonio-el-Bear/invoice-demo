@@ -387,6 +387,15 @@ function getInvoiceReminders() {
 					<div id="suggested_products_list" class="row"></div>
 				</div>
 			</div>
+			<div id="service_bundles_panel" class="panel panel-default" style="display:none;">
+				<div class="panel-heading">
+					<h4 class="float-left">Service Bundles</h4>
+					<div class="clear"></div>
+				</div>
+				<div class="panel-body">
+					<div id="service_bundles_list" class="row"></div>
+				</div>
+			</div>
 			<div id="invoice_totals" class="padding-right row text-right">
 				<div class="col-xs-6">
 					<!-- FIX: was class-"form-control" — typo with dash instead of equals sign, broke the textarea styling -->

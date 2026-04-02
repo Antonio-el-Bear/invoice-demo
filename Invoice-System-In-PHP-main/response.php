@@ -73,6 +73,90 @@ function getDefaultItServiceTemplates() {
 	);
 }
 
+function getProductPriceByName($mysqli, $productName) {
+	$stmt = $mysqli->prepare("SELECT product_price FROM products WHERE product_name = ? ORDER BY product_id DESC LIMIT 1");
+	if (!$stmt) {
+		return '';
+	}
+
+	$stmt->bind_param('s', $productName);
+	$stmt->execute();
+	$stmt->bind_result($price);
+	$found = $stmt->fetch();
+	$stmt->close();
+
+	if ($found && $price !== null && $price !== '') {
+		return (string)$price;
+	}
+
+	$templates = getDefaultItServiceTemplates();
+	foreach ($templates as $template) {
+		if ($template['product_name'] === $productName) {
+			return (string)$template['product_price'];
+		}
+	}
+
+	return '';
+}
+
+function getServiceBundles($mysqli) {
+	$bundleTemplates = array(
+		array(
+			'bundle_name' => 'Managed IT Monthly Plan',
+			'bundle_desc' => 'Recurring support package for SMEs with maintenance and user support.',
+			'items' => array(
+				array('product_name' => 'Remote IT Support', 'qty' => 4),
+				array('product_name' => 'Website Maintenance', 'qty' => 1)
+			)
+		),
+		array(
+			'bundle_name' => 'New Office Setup Package',
+			'bundle_desc' => 'Network rollout and onboarding support for a new office or branch.',
+			'items' => array(
+				array('product_name' => 'Network Setup And Troubleshooting', 'qty' => 1),
+				array('product_name' => 'On-Site IT Support', 'qty' => 2),
+				array('product_name' => 'Microsoft 365 Setup', 'qty' => 1)
+			)
+		),
+		array(
+			'bundle_name' => 'Business Continuity Starter',
+			'bundle_desc' => 'Preventive support and operational continuity services.',
+			'items' => array(
+				array('product_name' => 'Remote IT Support', 'qty' => 2),
+				array('product_name' => 'On-Site IT Support', 'qty' => 1),
+				array('product_name' => 'Website Maintenance', 'qty' => 1)
+			)
+		)
+	);
+
+	$bundles = array();
+	foreach ($bundleTemplates as $bundle) {
+		$total = 0;
+		$items = array();
+
+		foreach ($bundle['items'] as $item) {
+			$price = getProductPriceByName($mysqli, $item['product_name']);
+			$lineTotal = ((float)$price) * ((int)$item['qty']);
+			$total += $lineTotal;
+			$items[] = array(
+				'product_name' => $item['product_name'],
+				'qty' => (int)$item['qty'],
+				'product_price' => $price,
+				'line_total' => number_format($lineTotal, 2, '.', '')
+			);
+		}
+
+		$bundles[] = array(
+			'bundle_name' => $bundle['bundle_name'],
+			'bundle_desc' => $bundle['bundle_desc'],
+			'bundle_total' => number_format($total, 2, '.', ''),
+			'items' => $items
+		);
+	}
+
+	return $bundles;
+}
+
 function buildCustomerProfileFromRequest() {
 	$customer = array(
 		'name' => isset($_POST['customer_name']) ? trim($_POST['customer_name']) : '',
@@ -267,6 +351,19 @@ function appendAutofillMatches(&$matches, &$seenKeys, $result, $sourceLabel, $cu
 }
 
 $action = isset($_POST['action']) ? $_POST['action'] : "";
+
+if ($action == 'get_service_bundles') {
+	header('Content-Type: application/json');
+
+	echo json_encode(array(
+		'status' => 'Success',
+		'message' => 'Service bundles loaded.',
+		'data' => array(
+			'bundles' => getServiceBundles($mysqli)
+		)
+	));
+	exit;
+}
 
 if ($action == 'seed_it_service_products') {
 	header('Content-Type: application/json');
