@@ -33,6 +33,46 @@ function buildAutofillCustomerPayload($row) {
 	);
 }
 
+function getDefaultItServiceTemplates() {
+	return array(
+		array(
+			'product_name' => 'Remote IT Support',
+			'product_desc' => 'Remote troubleshooting, software fixes, and user support.',
+			'product_price' => '650.00',
+			'usage_count' => 0,
+			'source_label' => 'IT service template'
+		),
+		array(
+			'product_name' => 'On-Site IT Support',
+			'product_desc' => 'Callout support for workstation, printer, and office IT issues.',
+			'product_price' => '950.00',
+			'usage_count' => 0,
+			'source_label' => 'IT service template'
+		),
+		array(
+			'product_name' => 'Network Setup And Troubleshooting',
+			'product_desc' => 'Router, switch, Wi-Fi, and structured network support services.',
+			'product_price' => '1800.00',
+			'usage_count' => 0,
+			'source_label' => 'IT service template'
+		),
+		array(
+			'product_name' => 'Microsoft 365 Setup',
+			'product_desc' => 'Mailbox setup, licensing, user onboarding, and tenant support.',
+			'product_price' => '1200.00',
+			'usage_count' => 0,
+			'source_label' => 'IT service template'
+		),
+		array(
+			'product_name' => 'Website Maintenance',
+			'product_desc' => 'Website updates, uptime checks, backups, and minor content changes.',
+			'product_price' => '1500.00',
+			'usage_count' => 0,
+			'source_label' => 'IT service template'
+		)
+	);
+}
+
 function buildCustomerProfileFromRequest() {
 	$customer = array(
 		'name' => isset($_POST['customer_name']) ? trim($_POST['customer_name']) : '',
@@ -99,43 +139,7 @@ function loadSuggestedProducts($mysqli, $customer) {
 	$suggestions = array();
 	$customerEmail = isset($customer['email']) ? trim($customer['email']) : '';
 	$customerName = isset($customer['name']) ? trim($customer['name']) : '';
-	$defaultServiceTemplates = array(
-		array(
-			'product_name' => 'Remote IT Support',
-			'product_desc' => 'Remote troubleshooting, software fixes, and user support.',
-			'product_price' => '650.00',
-			'usage_count' => 0,
-			'source_label' => 'IT service template'
-		),
-		array(
-			'product_name' => 'On-Site IT Support',
-			'product_desc' => 'Callout support for workstation, printer, and office IT issues.',
-			'product_price' => '950.00',
-			'usage_count' => 0,
-			'source_label' => 'IT service template'
-		),
-		array(
-			'product_name' => 'Network Setup And Troubleshooting',
-			'product_desc' => 'Router, switch, Wi-Fi, and structured network support services.',
-			'product_price' => '1800.00',
-			'usage_count' => 0,
-			'source_label' => 'IT service template'
-		),
-		array(
-			'product_name' => 'Microsoft 365 Setup',
-			'product_desc' => 'Mailbox setup, licensing, user onboarding, and tenant support.',
-			'product_price' => '1200.00',
-			'usage_count' => 0,
-			'source_label' => 'IT service template'
-		),
-		array(
-			'product_name' => 'Website Maintenance',
-			'product_desc' => 'Website updates, uptime checks, backups, and minor content changes.',
-			'product_price' => '1500.00',
-			'usage_count' => 0,
-			'source_label' => 'IT service template'
-		)
-	);
+	$defaultServiceTemplates = getDefaultItServiceTemplates();
 
 	if ($customerEmail !== '' || $customerName !== '') {
 		$historyConditions = array();
@@ -263,6 +267,62 @@ function appendAutofillMatches(&$matches, &$seenKeys, $result, $sourceLabel, $cu
 }
 
 $action = isset($_POST['action']) ? $_POST['action'] : "";
+
+if ($action == 'seed_it_service_products') {
+	header('Content-Type: application/json');
+
+	$templates = getDefaultItServiceTemplates();
+	$added = 0;
+	$skipped = 0;
+
+	$checkStmt = $mysqli->prepare("SELECT COUNT(*) FROM products WHERE product_name = ?");
+	$insertStmt = $mysqli->prepare("INSERT INTO products (product_name, product_desc, product_price) VALUES (?, ?, ?)");
+
+	if (!$checkStmt || !$insertStmt) {
+		echo json_encode(array(
+			'status' => 'Error',
+			'message' => 'Unable to prepare product template statements.'
+		));
+		exit;
+	}
+
+	foreach ($templates as $template) {
+		$productName = $template['product_name'];
+		$productDesc = $template['product_desc'];
+		$productPrice = $template['product_price'];
+
+		$exists = 0;
+		$checkStmt->bind_param('s', $productName);
+		$checkStmt->execute();
+		$checkStmt->bind_result($exists);
+		$checkStmt->fetch();
+		$checkStmt->free_result();
+
+		if ((int)$exists > 0) {
+			$skipped++;
+			continue;
+		}
+
+		$insertStmt->bind_param('sss', $productName, $productDesc, $productPrice);
+		if ($insertStmt->execute()) {
+			$added++;
+		}
+	}
+
+	$checkStmt->close();
+	$insertStmt->close();
+
+	echo json_encode(array(
+		'status' => 'Success',
+		'message' => 'IT service catalog templates processed.',
+		'data' => array(
+			'added' => $added,
+			'skipped' => $skipped,
+			'templates' => getDefaultItServiceTemplates()
+		)
+	));
+	exit;
+}
 
 if ($action == 'save_invoice_customer_profile') {
 	header('Content-Type: application/json');

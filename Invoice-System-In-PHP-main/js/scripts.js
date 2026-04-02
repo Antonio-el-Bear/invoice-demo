@@ -187,6 +187,11 @@ $(document).ready(function() {
 		});
 	});
 
+	$(document).on('click', '#seed_it_services_catalog', function(e) {
+		e.preventDefault();
+		seedItServiceCatalog();
+	});
+
 	$(document).on('click', ".item-select", function(e) {
 
    		e.preventDefault;
@@ -756,6 +761,42 @@ $(document).ready(function() {
 
 		$('#suggested_products_list').html(html);
 		$('#suggested_products_panel').show();
+	}
+
+	function seedItServiceCatalog() {
+		var $btn = $('#seed_it_services_catalog').button('loading');
+
+		$.ajax({
+			url: 'response.php',
+			type: 'POST',
+			dataType: 'json',
+			data: {
+				action: 'seed_it_service_products'
+			},
+			success: function(data) {
+				if (data.status !== 'Success') {
+					$('#response').removeClass('alert-success').addClass('alert-warning').fadeIn();
+					$('#response .message').html('<strong>Error</strong>: ' + (data.message || 'Unable to add IT service templates.'));
+					$btn.button('reset');
+					return;
+				}
+
+				var addedCount = data.data && typeof data.data.added !== 'undefined' ? data.data.added : 0;
+				var skippedCount = data.data && typeof data.data.skipped !== 'undefined' ? data.data.skipped : 0;
+				var templates = data.data && data.data.templates ? data.data.templates : [];
+
+				renderSuggestedProducts(templates);
+				$('#response').removeClass('alert-warning').addClass('alert-success').fadeIn();
+				$('#response .message').html('<strong>Success</strong>: IT service templates processed. Added ' + escapeHtml(String(addedCount)) + ', skipped ' + escapeHtml(String(skippedCount)) + '.');
+				$('html, body').animate({ scrollTop: $('#response').offset().top }, 600);
+				$btn.button('reset');
+			},
+			error: function() {
+				$('#response').removeClass('alert-success').addClass('alert-warning').fadeIn();
+				$('#response .message').html('<strong>Error</strong>: Failed to add IT service templates to the catalog.');
+				$btn.button('reset');
+			}
+		});
 	}
 
 	function ensureSingleEmptyInvoiceRow() {

@@ -380,6 +380,7 @@ function getInvoiceReminders() {
 			<div id="suggested_products_panel" class="panel panel-default" style="display:none;">
 				<div class="panel-heading">
 					<h4 class="float-left">Suggested Products</h4>
+					<a href="#" id="seed_it_services_catalog" class="float-right btn btn-warning btn-xs" data-loading-text="Adding...">Add IT Service Templates To Catalog</a>
 					<div class="clear"></div>
 				</div>
 				<div class="panel-body">
