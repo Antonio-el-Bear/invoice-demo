@@ -831,28 +831,4 @@ $(document).ready(function() {
 	    return errorCounter;
 	}
 
-	// Simple validation for login form
-	function validateForm() {
-	    var errorCounter = 0;
-	    var $username = $("#username");
-	    var $password = $("#password, input[name='password']").first();
-	    var username = ($username.val() || "").trim();
-	    var password = ($password.val() || "").trim();
-
-	    if (username === "") {
-	        errorCounter++;
-	        $username.addClass("input-error");
-	    } else {
-	        $username.removeClass("input-error");
-	    }
-
-	    if (password === "") {
-	        errorCounter++;
-	        $password.addClass("input-error");
-	    } else {
-	        $password.removeClass("input-error");
-	    }
-
-	    return errorCounter;
-	}
 });
