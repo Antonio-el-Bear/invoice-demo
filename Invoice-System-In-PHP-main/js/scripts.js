@@ -789,7 +789,7 @@ $(document).ready(function() {
 			jQuery.ajax({
 				url: 'login.php',
 				type: "POST",
-				data: $("#login_form").serialize(),
+				data: $("#login_form, #login-form").first().serialize(),
 				success: function(response){
 					if(response == 1) {
 						window.location = "dashboard.php";
@@ -833,21 +833,26 @@ $(document).ready(function() {
 
 	// Simple validation for login form
 	function validateForm() {
-    var errorCounter = 0;
-    var username = $("#username").val().trim();
-    var password = $("#password").val().trim();
-    if (username === "") {
-        errorCounter++;
-        $("#username").addClass("input-error");
-    } else {
-        $("#username").removeClass("input-error");
-    }
-    if (password === "") {
-        errorCounter++;
-        $("#password").addClass("input-error");
-    } else {
-        $("#password").removeClass("input-error");
-    }
-    return errorCounter;
-}
+	    var errorCounter = 0;
+	    var $username = $("#username");
+	    var $password = $("#password, input[name='password']").first();
+	    var username = ($username.val() || "").trim();
+	    var password = ($password.val() || "").trim();
+
+	    if (username === "") {
+	        errorCounter++;
+	        $username.addClass("input-error");
+	    } else {
+	        $username.removeClass("input-error");
+	    }
+
+	    if (password === "") {
+	        errorCounter++;
+	        $password.addClass("input-error");
+	    } else {
+	        $password.removeClass("input-error");
+	    }
+
+	    return errorCounter;
+	}
 });

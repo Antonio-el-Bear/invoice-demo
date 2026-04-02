@@ -21,13 +21,20 @@ ini_set('error_reporting', E_ALL);
 // ============================================
 // DATABASE CONNECTION SETTINGS
 // ============================================
-// These settings connect the application to your MySQL/MariaDB database
-// Only define if not already defined (prevents redefinition errors)
+// These settings connect the application to your MySQL/MariaDB database.
+// Auto-detect Docker runtime and use local XAMPP defaults otherwise.
 
-if (!defined('DATABASE_HOST')) define('DATABASE_HOST', 'db');               // Database server address (Docker service name)
-if (!defined('DATABASE_NAME')) define('DATABASE_NAME', 'invoice_db');       // Name of the database (Docker Compose default)
-if (!defined('DATABASE_USER')) define('DATABASE_USER', 'invoice_user');     // Database username (Docker Compose default)
-if (!defined('DATABASE_PASS')) define('DATABASE_PASS', 'invoice_pass');     // Database password (Docker Compose default)
+$isDockerRuntime = file_exists('/.dockerenv') || getenv('CONTAINER') === 'docker';
+
+$defaultDbHost = $isDockerRuntime ? 'db' : 'localhost';
+$defaultDbName = $isDockerRuntime ? 'invoice_db' : 'invoicemgsys';
+$defaultDbUser = $isDockerRuntime ? 'invoice_user' : 'root';
+$defaultDbPass = $isDockerRuntime ? 'invoice_pass' : '';
+
+if (!defined('DATABASE_HOST')) define('DATABASE_HOST', $defaultDbHost);
+if (!defined('DATABASE_NAME')) define('DATABASE_NAME', $defaultDbName);
+if (!defined('DATABASE_USER')) define('DATABASE_USER', $defaultDbUser);
+if (!defined('DATABASE_PASS')) define('DATABASE_PASS', $defaultDbPass);
 
 // ============================================
 // COMPANY BRANDING & LOGO

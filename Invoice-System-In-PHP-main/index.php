@@ -78,7 +78,7 @@ include('functions.php');
 			    		 	<!-- Icon for password field -->
 			    		 	<div class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></div>
 			    		 	<!-- Password input (type="password" hides characters) -->
-			    			<input class="form-control required" placeholder="Password" name="password" type="password" placeholder="Enter Password" autocomplete="current-password">
+				    		<input class="form-control required" id="password" placeholder="Password" name="password" type="password" placeholder="Enter Password" autocomplete="current-password">
 			    		</div>
 			    		
 			    		<!-- ============================================
