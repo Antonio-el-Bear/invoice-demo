@@ -99,6 +99,43 @@ function loadSuggestedProducts($mysqli, $customer) {
 	$suggestions = array();
 	$customerEmail = isset($customer['email']) ? trim($customer['email']) : '';
 	$customerName = isset($customer['name']) ? trim($customer['name']) : '';
+	$defaultServiceTemplates = array(
+		array(
+			'product_name' => 'Remote IT Support',
+			'product_desc' => 'Remote troubleshooting, software fixes, and user support.',
+			'product_price' => '650.00',
+			'usage_count' => 0,
+			'source_label' => 'IT service template'
+		),
+		array(
+			'product_name' => 'On-Site IT Support',
+			'product_desc' => 'Callout support for workstation, printer, and office IT issues.',
+			'product_price' => '950.00',
+			'usage_count' => 0,
+			'source_label' => 'IT service template'
+		),
+		array(
+			'product_name' => 'Network Setup And Troubleshooting',
+			'product_desc' => 'Router, switch, Wi-Fi, and structured network support services.',
+			'product_price' => '1800.00',
+			'usage_count' => 0,
+			'source_label' => 'IT service template'
+		),
+		array(
+			'product_name' => 'Microsoft 365 Setup',
+			'product_desc' => 'Mailbox setup, licensing, user onboarding, and tenant support.',
+			'product_price' => '1200.00',
+			'usage_count' => 0,
+			'source_label' => 'IT service template'
+		),
+		array(
+			'product_name' => 'Website Maintenance',
+			'product_desc' => 'Website updates, uptime checks, backups, and minor content changes.',
+			'product_price' => '1500.00',
+			'usage_count' => 0,
+			'source_label' => 'IT service template'
+		)
+	);
 
 	if ($customerEmail !== '' || $customerName !== '') {
 		$historyConditions = array();
@@ -148,6 +185,10 @@ function loadSuggestedProducts($mysqli, $customer) {
 				);
 			}
 		}
+	}
+
+	if (count($suggestions) === 0) {
+		$suggestions = $defaultServiceTemplates;
 	}
 
 	return $suggestions;

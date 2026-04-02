@@ -155,6 +155,11 @@ $(document).ready(function() {
 		autoFillInvoice();
 	});
 
+	$(document).on('click', '#save_invoice_customer', function(e) {
+		e.preventDefault();
+		saveInvoiceCustomerProfile();
+	});
+
 	$(document).on('click', '.auto-fill-match', function(e) {
 		e.preventDefault();
 
@@ -168,6 +173,18 @@ $(document).ready(function() {
 		$("#response").removeClass("alert-warning").addClass("alert-success").fadeIn();
 		$("#response .message").html("<strong>Success</strong>: Auto fill applied for " + escapeHtml(autoFillMatches[matchIndex].display_name || 'selected client') + ".");
 		$("html, body").animate({ scrollTop: $('#response').offset().top }, 600);
+	});
+
+	$(document).on('click', '.add-suggested-product', function(e) {
+		e.preventDefault();
+
+		var $button = $(this);
+		addInvoiceItemRow({
+			product: $button.attr('data-product-name') || '',
+			price: $button.attr('data-product-price') || '',
+			qty: 1,
+			discount: ''
+		});
 	});
 
 	$(document).on('click', ".item-select", function(e) {
@@ -281,7 +298,7 @@ $(document).ready(function() {
     var cloned = $('#invoice_table tr:last').clone();
     $(".add-row").click(function(e) {
         e.preventDefault();
-        cloned.clone().appendTo('#invoice_table'); 
+		addInvoiceItemRow();
     });
     
     calculateTotal();
@@ -536,7 +553,51 @@ $(document).ready(function() {
 
 	}
 
-	function autoFillInvoice() {
+	function saveInvoiceCustomerProfile() {
+		var customerName = $.trim($("#customer_name").val());
+		var customerEmail = $.trim($("#customer_email").val());
+
+		if (customerName === '' || customerEmail === '') {
+			$("#response").removeClass("alert-success").addClass("alert-warning").fadeIn();
+			$("#response .message").html("<strong>Error</strong>: Enter customer name and email before saving the client profile.");
+			$("#customer_name, #customer_email").parent().addClass("has-error");
+			$("html, body").animate({ scrollTop: $('#response').offset().top }, 600);
+			return;
+		}
+
+		$("#customer_name, #customer_email").parent().removeClass("has-error");
+
+		var $btn = $("#save_invoice_customer").button("loading");
+		var payload = $("#create_invoice").serializeArray();
+		payload.push({ name: 'action', value: 'save_invoice_customer_profile' });
+
+		$.ajax({
+			url: 'response.php',
+			type: 'POST',
+			dataType: 'json',
+			data: $.param(payload),
+			success: function(data) {
+				$("#response .message").html("<strong>" + data.status + "</strong>: " + data.message);
+				$("#response").removeClass("alert-warning").addClass(data.status === 'Success' ? 'alert-success' : 'alert-warning').fadeIn();
+				$("html, body").animate({ scrollTop: $('#response').offset().top }, 600);
+				if (data.status === 'Success') {
+					autoFillInvoice({
+						successMessage: 'Client profile saved and suggestions refreshed.',
+						noMatchMessage: 'Client profile saved, but no autofill match could be refreshed yet.'
+					});
+				}
+				$btn.button("reset");
+			},
+			error: function() {
+				$("#response").removeClass("alert-success").addClass("alert-warning").fadeIn();
+				$("#response .message").html("<strong>Error</strong>: Unable to save the client profile.");
+				$btn.button("reset");
+			}
+		});
+	}
+
+	function autoFillInvoice(options) {
+		var settings = options || {};
 		var customerEmail = $.trim($("#customer_email").val());
 		var customerName = $.trim($("#customer_name").val());
 
@@ -573,7 +634,7 @@ $(document).ready(function() {
 
 				if (autoFillMatches.length === 0) {
 					$("#response").removeClass("alert-success").addClass("alert-warning").fadeIn();
-					$("#response .message").html("<strong>Notice</strong>: No matching customer record found for auto fill.");
+					$("#response .message").html("<strong>Notice</strong>: " + (settings.noMatchMessage || "No matching customer record found for auto fill."));
 					$btn.button("reset");
 					return;
 				}
@@ -581,7 +642,7 @@ $(document).ready(function() {
 				if (autoFillMatches.length === 1) {
 					applyAutoFillData(autoFillMatches[0]);
 					$("#response").removeClass("alert-warning").addClass("alert-success").fadeIn();
-					$("#response .message").html("<strong>Success</strong>: Auto fill applied from the best matching profile.");
+					$("#response .message").html("<strong>Success</strong>: " + (settings.successMessage || "Auto fill applied from the best matching profile."));
 					$("html, body").animate({ scrollTop: $('#response').offset().top }, 600);
 				} else {
 					renderAutoFillMatches(autoFillMatches);
@@ -607,6 +668,7 @@ $(document).ready(function() {
 			var invoiceInfo = match.invoice_number ? 'Last invoice #' + escapeHtml(match.invoice_number) : 'No previous invoice items';
 			var locationInfo = match.display_location ? '<div>' + escapeHtml(match.display_location) + '</div>' : '';
 			var emailInfo = match.display_email ? '<div>' + escapeHtml(match.display_email) + '</div>' : '<div>No email saved</div>';
+			var scoreInfo = typeof match.match_score !== 'undefined' ? '<div>Match score: ' + escapeHtml(String(match.match_score)) + '</div>' : '';
 
 			html += '' +
 				'<a href="#" class="list-group-item auto-fill-match" data-match-index="' + index + '">' +
@@ -615,6 +677,7 @@ $(document).ready(function() {
 						'<strong>' + escapeHtml(match.source_label || 'Saved profile') + '</strong><br>' +
 						emailInfo +
 						locationInfo +
+						scoreInfo +
 						'<div>' + invoiceInfo + '</div>' +
 					'</p>' +
 				'</a>';
@@ -648,21 +711,73 @@ $(document).ready(function() {
 
 		if (payload.items && payload.items.length > 0) {
 			var $tbody = $('#invoice_table tbody');
-			var $template = $tbody.find('tr:first').clone();
 			$tbody.empty();
 
 			$.each(payload.items, function(_, item) {
-				var $row = $template.clone();
-				$row.find('.invoice_product').val(item.product || "");
-				$row.find('[name="invoice_product_qty[]"]').val(item.qty || 1);
-				$row.find('[name="invoice_product_price[]"]').val(item.price || "");
-				$row.find('[name="invoice_product_discount[]"]').val(item.discount || "");
-				$row.find('[name="invoice_product_sub[]"]').val(item.subtotal || "0.00");
-				$tbody.append($row);
+				addInvoiceItemRow({
+					product: item.product || '',
+					qty: item.qty || 1,
+					price: item.price || '',
+					discount: item.discount || '',
+					subtotal: item.subtotal || '0.00'
+				});
 			});
+		} else {
+			ensureSingleEmptyInvoiceRow();
 		}
 
+		renderSuggestedProducts(payload.suggestions || []);
 		calculateTotal();
+	}
+
+	function renderSuggestedProducts(suggestions) {
+		var html = '';
+
+		if (!suggestions || suggestions.length === 0) {
+			$('#suggested_products_list').empty();
+			$('#suggested_products_panel').hide();
+			return;
+		}
+
+		$.each(suggestions, function(_, suggestion) {
+			html += '' +
+				'<div class="col-sm-6 col-md-4">' +
+					'<div class="panel panel-info">' +
+						'<div class="panel-heading"><strong>' + escapeHtml(suggestion.product_name || 'Product') + '</strong></div>' +
+						'<div class="panel-body">' +
+							'<p>' + escapeHtml(suggestion.product_desc || 'No description saved') + '</p>' +
+							'<p><strong>Price:</strong> ' + escapeHtml(String(suggestion.product_price || '0.00')) + '</p>' +
+							'<p><strong>Source:</strong> ' + escapeHtml(suggestion.source_label || 'Suggestion') + '</p>' +
+							'<a href="#" class="btn btn-info btn-xs add-suggested-product" data-product-name="' + escapeHtml(suggestion.product_name || '') + '" data-product-price="' + escapeHtml(String(suggestion.product_price || '')) + '">Add To Invoice</a>' +
+						'</div>' +
+					'</div>' +
+				'</div>';
+		});
+
+		$('#suggested_products_list').html(html);
+		$('#suggested_products_panel').show();
+	}
+
+	function ensureSingleEmptyInvoiceRow() {
+		var $tbody = $('#invoice_table tbody');
+		if ($tbody.find('tr').length === 0) {
+			addInvoiceItemRow();
+		}
+	}
+
+	function addInvoiceItemRow(itemData) {
+		var data = itemData || {};
+		var $row = cloned.clone();
+
+		$row.find('.invoice_product').val(data.product || '');
+		$row.find('[name="invoice_product_qty[]"]').val(data.qty || 1);
+		$row.find('[name="invoice_product_price[]"]').val(data.price || '');
+		$row.find('[name="invoice_product_discount[]"]').val(data.discount || '');
+		$row.find('[name="invoice_product_sub[]"]').val(data.subtotal || '0.00');
+		$('#invoice_table tbody').append($row);
+		updateTotals($row.find('.invoice_product_price'));
+		calculateTotal();
+		return $row;
 	}
 
 	function escapeHtml(value) {
