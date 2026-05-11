@@ -359,7 +359,7 @@ function getInvoiceReminders() {
 						<td class="text-right">
 							<div class="input-group input-group-sm  no-margin-bottom">
 								<span class="input-group-addon"><?php echo CURRENCY ?></span>
-								<input type="number" class="form-control calculate invoice_product_price required invoice-field-wide" name="invoice_product_price[]" aria-describedby="sizing-addon1" placeholder="0.00">
+								<input type="number" class="form-control calculate invoice_product_price required invoice-discount-field" name="invoice_product_price[]" aria-describedby="sizing-addon1" placeholder="0.00">
 							</div>
 						</td>
 						<td class="text-right">
