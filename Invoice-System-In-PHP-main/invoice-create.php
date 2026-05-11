@@ -353,25 +353,25 @@ function getInvoiceReminders() {
 						</td>
 						<td class="text-right">
 							<div class="form-group form-group-sm no-margin-bottom">
-								<input type="number" step="0.25" min="0.25" class="form-control invoice_product_qty calculate" name="invoice_product_qty[]" value="1">
+								<input type="number" step="0.25" min="0.25" class="form-control invoice_product_qty calculate invoice-field-wide" name="invoice_product_qty[]" value="1">
 							</div>
 						</td>
 						<td class="text-right">
 							<div class="input-group input-group-sm  no-margin-bottom">
 								<span class="input-group-addon"><?php echo CURRENCY ?></span>
-								<input type="number" class="form-control calculate invoice_product_price required" name="invoice_product_price[]" aria-describedby="sizing-addon1" placeholder="0.00">
+								<input type="number" class="form-control calculate invoice_product_price required invoice-field-wide" name="invoice_product_price[]" aria-describedby="sizing-addon1" placeholder="0.00">
 							</div>
 						</td>
 						<td class="text-right">
 							<div class="form-group form-group-sm  no-margin-bottom">
-								<input type="text" class="form-control calculate" name="invoice_product_discount[]" placeholder="Enter % OR value (ex: 10% or 10.50)">
+								<input type="text" class="form-control calculate invoice-field-wide" name="invoice_product_discount[]" placeholder="Enter % OR value (ex: 10% or 10.50)">
 							</div>
 						</td>
 						<td class="text-right">
 							<div class="input-group input-group-sm">
 								<span class="input-group-addon"><?php echo CURRENCY ?></span>
 								<!-- FIX: was 'class-"form-control"' (dash instead of equals) — broken HTML attribute -->
-								<input type="text" class="form-control calculate-sub" name="invoice_product_sub[]" id="invoice_product_sub" value="0.00" aria-describedby="sizing-addon1" disabled>
+								<input type="text" class="form-control calculate-sub invoice-field-wide" name="invoice_product_sub[]" id="invoice_product_sub" value="0.00" aria-describedby="sizing-addon1" disabled>
 							</div>
 						</td>
 					</tr>
