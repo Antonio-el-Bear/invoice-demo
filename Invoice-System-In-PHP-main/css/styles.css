@@ -6,6 +6,16 @@
   background: #fffbe7;
   border: 2px solid #bdbdbd;
 }
+
+/* Make discount field smaller */
+.invoice-discount-field {
+  min-width: 50px;
+  width: 70px !important;
+  max-width: 90px;
+  font-size: 16px;
+  background: #fffbe7;
+  border: 2px solid #bdbdbd;
+}
 /*******************************************************************************
 * Md Invoice System                                             *
 *                                                                              *

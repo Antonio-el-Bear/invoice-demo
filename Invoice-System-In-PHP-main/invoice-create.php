@@ -364,7 +364,7 @@ function getInvoiceReminders() {
 						</td>
 						<td class="text-right">
 							<div class="form-group form-group-sm  no-margin-bottom">
-								<input type="text" class="form-control calculate invoice-field-wide" name="invoice_product_discount[]" placeholder="Enter % OR value (ex: 10% or 10.50)">
+								<input type="text" class="form-control calculate invoice-discount-field" name="invoice_product_discount[]" placeholder="Enter % OR value (ex: 10% or 10.50)">
 							</div>
 						</td>
 						<td class="text-right">
